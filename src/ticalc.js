@@ -14,6 +14,8 @@ module.exports = {
   models: () => calculators.map(c => c.name),
 
   choose: async () => {
+    if ( !navigator.usb ) throw 'WebUSB not supported by this web browser';
+
     // Ask user to pick a device
     let device;
     try {
@@ -52,16 +54,18 @@ module.exports = {
 
 };
 
-navigator.usb.addEventListener('connect', e => {
-  const calc = calcCache[e.device];
-  console.debug('📱 Calculator connected');
-  if ( !calc ) return;
-  eventHandlers.connect.forEach(h => h(calc));
-});
+if ( navigator.usb ) {
+  navigator.usb.addEventListener('connect', e => {
+    const calc = calcCache[e.device];
+    console.debug('📱 Calculator connected');
+    if ( !calc ) return;
+    eventHandlers.connect.forEach(h => h(calc));
+  });
 
-navigator.usb.addEventListener('disconnect', e => {
-  const calc = calcCache[e.device];
-  console.debug('📱 Calculator disconnected');
-  if ( !calc ) return;
-  eventHandlers.disconnect.forEach(h => h(calc));
-});
+  navigator.usb.addEventListener('disconnect', e => {
+    const calc = calcCache[e.device];
+    console.debug('📱 Calculator disconnected');
+    if ( !calc ) return;
+    eventHandlers.disconnect.forEach(h => h(calc));
+  });
+}
