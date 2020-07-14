@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
+    "start": "webpack --watch",
     "build": "webpack --mode production",
     "test": "jest",
     "watch-tests": "jest --watch"
