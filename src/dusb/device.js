@@ -55,13 +55,12 @@ module.exports = class Device {
     await this._expectAck();
 
     // Next, send packets with just data
-    // const numPackets = Math.ceil(packet.data.length / this._bufferSize);
-    const q = (packet.data.length - offset) / this._bufferSize;
-		const r = (packet.data.length - offset) % this._bufferSize;
+    const numPackets = (packet.data.length - offset) / this._bufferSize;
+		const remainder  = (packet.data.length - offset) % this._bufferSize;
 
-    for ( let i = 1; i <= q; i++ ) {
+    for ( let i = 1; i <= numPackets; i++ ) {
       await this._send(b.constructRawPacket({
-        type: (i != q || r != 0) ? v.rawPacketTypes.DUSB_RPKT_VIRT_DATA : v.rawPacketTypes.VIRT_DATA_LAST,
+        type: (i == numPackets && remainder == 0) ? v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST : v.rawPacketTypes.DUSB_RPKT_VIRT_DATA,
         data: packet.data.slice(offset, offset + this._bufferSize)
       }));
       offset += this._bufferSize;
@@ -69,7 +68,7 @@ module.exports = class Device {
     }
 
     // Send last chunk if needed
-    if ( r != 0 ) {
+    if ( remainder != 0 ) {
       await this._send(b.constructRawPacket({
         type: v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST,
         data: packet.data.slice(offset, offset + packet.data.length)
