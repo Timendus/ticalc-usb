@@ -12,6 +12,8 @@ module.exports = {
   bytesToInt,
   asciiToBytes,
   bytesToAscii,
+
+  chunkArray
 }
 
 function constructRawPacket(packet) {
@@ -173,4 +175,23 @@ function bytesToAscii(bytes) {
   // Interpret the rest as UTF-8 bytes
   const TD = typeof TextDecoder !== 'undefined' ? TextDecoder : require('util').TextDecoder;
   return new TD("utf-8").decode(bytes);
+}
+
+// Split up an array in pieces, each of a size defined in sizes. If we run out
+// of sizes, but we have data left, we continue with the last given size. If we
+// run out of data, we stop.
+function chunkArray(array, sizes) {
+  const result = [];
+  let i, j = 0;
+  for ( i = 0; i < sizes.length; i++ ) {
+    result.push(array.slice(j, j + sizes[i]));
+    j += sizes[i];
+    if ( j >= array.length ) return result;
+  }
+  i--;
+  while ( j < array.length ) {
+    result.push(array.slice(j, j + sizes[i]));
+    j += sizes[i];
+  }
+  return result;
 }

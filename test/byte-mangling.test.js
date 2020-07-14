@@ -207,4 +207,43 @@ describe('byte-mangling.js', () => {
 
   });
 
+  describe('chunkArray', () => {
+    it('cuts an array in pieces of the given sizes', () => {
+      expect(b.chunkArray(
+        [1,2, 3,4,5, 6,7,8,9, 0],
+        [2, 3, 4, 1]
+      )).toEqual(
+        [[1,2],[3,4,5],[6,7,8,9],[0]]
+      );
+    });
+    it('keeps cutting even if the sizes run out', () => {
+      expect(b.chunkArray(
+        [1,2, 3,4,5, 6,7,8, 9,0],
+        [2, 3]
+      )).toEqual(
+        [[1,2],[3,4,5],[6,7,8],[9,0]]
+      );
+    });
+    it('stops cutting if the data runs out', () => {
+      expect(b.chunkArray(
+        [1,2, 3,4,5, 6,7,8,9, 0],
+        [2, 3, 4, 5, 6, 7]
+      )).toEqual(
+        [[1,2],[3,4,5],[6,7,8,9],[0]]
+      );
+      expect(b.chunkArray(
+        [1,2,3,4,5,6,7,8,9,0],
+        [20]
+      )).toEqual(
+        [[1,2,3,4,5,6,7,8,9,0]]
+      );
+      expect(b.chunkArray(
+        [],
+        [10]
+      )).toEqual(
+        [[]]
+      );
+    });
+  });
+
 });

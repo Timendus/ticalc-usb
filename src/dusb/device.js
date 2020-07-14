@@ -32,47 +32,28 @@ module.exports = class Device {
 
   // Send a virtual packet to the device
   async send(packet) {
-    // For small data packets, it's just a one-off
-    if ( !packet.data || packet.data.length <= this._bufferSize - v.virtualPacketTypes.HEADER_SIZE ) {
-      await this._send(b.constructRawPacket({
-        type: v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST,
-        data: b.constructVirtualPacket(packet)
-      }));
-      await this._expectAck();
-      return;
-    }
+    // Cut data in chunks to be sent
+    const chunks = b.chunkArray(
+      packet.data || [],
+      [
+        this._bufferSize - v.virtualPacketTypes.HEADER_SIZE, // Leave room for header on first
+        this._bufferSize                                     // Cut the rest in equal pieces
+      ]
+    );
 
-    // For larger data packets, we need to fragment the data
-    // Send packet with virtual header first
-    let offset = this._bufferSize - v.virtualPacketTypes.HEADER_SIZE;
-    await this._send(b.constructRawPacket({
-      type: v.rawPacketTypes.DUSB_RPKT_VIRT_DATA,
-      data: b.constructVirtualPacket({
-        ...packet,
-        data: packet.data.slice(0, offset)
-      })
-    }));
-    await this._expectAck();
+    // Send the chunks
+    for ( let i = 0; i < chunks.length; i++ ) {
+      // Give the first packet a virtual header
+      const data = i == 0 ?
+        b.constructVirtualPacket({ ...packet, data: chunks[i] }) :
+        chunks[i];
 
-    // Next, send packets with just data
-    const numPackets = (packet.data.length - offset) / this._bufferSize;
-		const remainder  = (packet.data.length - offset) % this._bufferSize;
+      // Give the last packet a type DUSB_RPKT_VIRT_DATA_LAST
+      const type = i == chunks.length - 1 ?
+        v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST:
+        v.rawPacketTypes.DUSB_RPKT_VIRT_DATA ;
 
-    for ( let i = 1; i <= numPackets; i++ ) {
-      await this._send(b.constructRawPacket({
-        type: (i == numPackets && remainder == 0) ? v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST : v.rawPacketTypes.DUSB_RPKT_VIRT_DATA,
-        data: packet.data.slice(offset, offset + this._bufferSize)
-      }));
-      offset += this._bufferSize;
-      await this._expectAck();
-    }
-
-    // Send last chunk if needed
-    if ( remainder != 0 ) {
-      await this._send(b.constructRawPacket({
-        type: v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST,
-        data: packet.data.slice(offset, offset + packet.data.length)
-      }));
+      await this._send(b.constructRawPacket({ type, data }));
       await this._expectAck();
     }
   }
