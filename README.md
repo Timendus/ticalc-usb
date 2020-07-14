@@ -22,11 +22,20 @@ If you run into issues, please
 
 ## Usage
 
+`ticalc-usb` is [available through NPM](https://www.npmjs.com/package/ticalc-usb)
+and can be installed as a dependency using NPM or Yarn:
+
+```bash
+npm install --save ticalc-usb
+```
+
+You can then import both modules of the library in your project like this:
+
 ```javascript
 const { ticalc, tifiles } = require('ticalc-usb');
 ```
 
-### ticalc
+### `ticalc`
 
 The `ticalc` module exposes three functions:
 
@@ -60,7 +69,7 @@ On calculator objects you can call these async methods:
   * `getFreeMem()` - get free RAM and Flash memory
   * `sendFile(file)` - Sends a given file object to the calculator (silent transfer)
 
-### tifiles
+### `tifiles`
 
 The `tifiles` module exposes these functions:
 
