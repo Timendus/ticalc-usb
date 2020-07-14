@@ -5,6 +5,8 @@ graphing calculators over WebUSB. It also has a module that can parse TI files
 (`*.8?p` / `*.8?g` files). As I only own a TI-84 Plus, development is highly
 skewed towards that device, but other devices should be fairly simple to add.
 
+Check out [ticalc.link](http://ticalc.link) to see the library in action.
+
 ## Status of this library
 
 This library is currently very experimental. I have successfully communicated
