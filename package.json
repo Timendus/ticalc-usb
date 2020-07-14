@@ -20,5 +20,9 @@
   "repository": {
     "type": "git",
     "url": "https://www.github.com/timendus/ticalc-usb/"
+  },
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true
   }
 }
