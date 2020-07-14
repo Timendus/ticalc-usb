@@ -28,18 +28,8 @@ module.exports = {
       throw e;
     }
 
-    // Which type of device did we pick?
-    const deviceHandler = calculators.find(c =>
-      c.identifier.vendorId == device.vendorId &&
-      c.identifier.productId == device.productId
-    );
-
-    if ( !deviceHandler )
-      throw "Woops! Could not find device handler. WebUSB's filters are more complicated than I can currently handle.";
-
-    // Create calculator instance and store in cache
-    const calc = await deviceHandler.connect(device);
-    calcCache[device] = calc;
+    // Wrap WebUSB device in a calculator object
+    const calc = await createDevice(device);
 
     // Fire connect event
     eventHandlers.connect.forEach(h => h(calc));
@@ -54,9 +44,30 @@ module.exports = {
 
 };
 
+async function createDevice(device) {
+  // Which type of device are we dealing with?
+  const deviceHandler = calculators.find(c =>
+    c.identifier.vendorId == device.vendorId &&
+    c.identifier.productId == device.productId
+  );
+
+  if ( !deviceHandler )
+    throw "Woops! Could not find device handler. WebUSB's filters are more complicated than I can currently handle.";
+
+  // Create calculator instance and store in cache
+  const calc = await deviceHandler.connect(device);
+  calcCache[device] = calc;
+
+  return calc;
+}
+
+async function findOrCreateDevice(device) {
+  return calcCache[device] || await createDevice(device);
+}
+
 if ( navigator.usb ) {
-  navigator.usb.addEventListener('connect', e => {
-    const calc = calcCache[e.device];
+  navigator.usb.addEventListener('connect', async e => {
+    const calc = await findOrCreateDevice(device);
     console.debug('📱 Calculator connected');
     if ( !calc ) return;
     eventHandlers.connect.forEach(h => h(calc));
@@ -68,4 +79,13 @@ if ( navigator.usb ) {
     if ( !calc ) return;
     eventHandlers.disconnect.forEach(h => h(calc));
   });
+
+  // If we load the page, and we have existing paired devices, connect to those
+  setTimeout(async () => {
+    const devices = await navigator.usb.getDevices();
+    devices.forEach(async device => {
+      const calc = await findOrCreateDevice(device);
+      eventHandlers.connect.forEach(h => h(calc));
+    });
+  }, 1);
 }
