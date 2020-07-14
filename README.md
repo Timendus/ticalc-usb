@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Timendus/ticalc-usb.svg?branch=master)](https://travis-ci.org/Timendus/ticalc-usb)
+
 # ticalc-usb
 
 `ticalc-usb` is a Javascript library to communicate with Texas Instruments
