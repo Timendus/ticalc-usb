@@ -44,33 +44,20 @@ module.exports = {
 }
 
 function getCalcType(bytes) {
-  switch(b.bytesToAscii(bytes)) {
-    case '**TI73**':
-      return 'TI-73';
-    case '**TI82**':
-      return 'TI-82';
-    case '**TI83**':
-      return 'TI-83';
-    case '**TI83F*':
-      return 'TI-84 Plus';
-    case '**TI85**':
-      return 'TI-85';
-    case '**TI86**':
-      return 'TI-86';
-    case '**TI89**':
-      return 'TI-89';
-    case '**TI92**':
-      return 'TI-92';
-    case '**TI92P*':
-      return 'TI-92 Plus';
-    case '**V200**':
-      return 'TI-V200';
-    case '**TICBL*':
-      return 'TI-CBL2';
-    default:
-      // Selected file is not suitable for any known calculator
-      return 'NONE';
-  }
+  const headers = {
+    '**TI73**': 'TI-73',
+    '**TI82**': 'TI-82',
+    '**TI83**': 'TI-83',
+    '**TI83F*': 'TI-84 Plus',
+    '**TI85**': 'TI-85',
+    '**TI86**': 'TI-86',
+    '**TI89**': 'TI-89',
+    '**TI92**': 'TI-92',
+    '**TI92P*': 'TI-92 Plus',
+    '**V200**': 'TI-V200',
+    '**TICBL*': 'TI-CBL2'
+  };
+  return headers[b.bytesToAscii(bytes)] || 'NONE';
 }
 
 function findEntries(bytes, file) {
