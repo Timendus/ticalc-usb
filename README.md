@@ -47,7 +47,7 @@ The `ticalc` module exposes three functions:
 
 ```javascript
 ticalc.addEventListener('connect', async calculator => {
-  if ( calculator.isReady() ) {
+  if ( await calculator.isReady() ) {
     // Type "HELLO":
     await calculator.pressKey(0xA1);
     await calculator.pressKey(0x9E);
@@ -83,8 +83,7 @@ Combined with `ticalc`, we can use these functions to send a TI file to a
 connected calculator:
 
 ```javascript
-// Load file
-// (Make sure readFile returns a Uint8Array)
+// Load file (make sure readFile returns a Uint8Array)
 const file = tifiles.parseFile(readFile(filename));
 
 if ( !tifiles.isValid(file) )
@@ -93,5 +92,6 @@ if ( !tifiles.isValid(file) )
 if ( !tifiles.isMatch(file, calculator) )
   return console.error(`The file you have selected does not appear to be a valid file for your ${calculator.name}`);
 
+// Assuming we received a calculator object from the `connect` event:
 await calculator.sendFile(file);
 ```
