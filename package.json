@@ -1,6 +1,6 @@
 {
   "name": "ticalc-usb",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A library to communicate with TI graphing calculators through WebUSB",
   "homepage": "https://ticalc.link",
   "main": "dist/index.js",
