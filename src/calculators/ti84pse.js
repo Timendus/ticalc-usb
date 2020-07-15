@@ -12,5 +12,5 @@ module.exports = {
   },
 
   connect: device =>
-    new Ti84PSE(device).connect()
+    new Ti84PSE(device, name).connect()
 }

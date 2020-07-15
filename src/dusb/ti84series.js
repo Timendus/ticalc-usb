@@ -4,7 +4,7 @@ const b = require('../byte-mangling');
 
 module.exports = class Ti84series {
 
-  constructor(device) {
+  constructor(device, name) {
     this._d = new Device(device);
     this.name = name;
   }
