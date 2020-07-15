@@ -1,6 +1,6 @@
 const calculators = [
-  require('./calculators/ti84p')
-  // ...To be extended in the future?
+  require('./calculators/ti84p'),
+  require('./calculators/ti84pse')
 ];
 
 const calcCache = {};
