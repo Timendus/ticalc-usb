@@ -14,6 +14,13 @@ module.exports = class Ti84series {
     return this;
   }
 
+  canReceive(file) {
+    return [
+      'TI-83',
+      'TI-84 Plus'
+    ].includes(file.calcType);
+  }
+
   // Check if the calculator is connected and listening
   async isReady() {
     try {

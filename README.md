@@ -64,12 +64,16 @@ ticalc.addEventListener('connect', async calculator => {
 ticalc.choose();
 ```
 
-On calculator objects you can call these async methods:
+On calculator objects you can call four async methods:
 
   * `isReady()` - return true if calculator is connected and listening
   * `pressKey(key)` - remotely press a key on the calculator
   * `getFreeMem()` - get free RAM and Flash memory
   * `sendFile(file)` - Sends a given file object to the calculator (silent transfer)
+
+And one regular method:
+
+  * `canReceive(file)` - tells you if a file is valid for this calculator
 
 ### `tifiles`
 
@@ -77,7 +81,6 @@ The `tifiles` module exposes these functions:
 
   * `parseFile(bindata)` - expects a Uint8Array and returns a file object
   * `isValid(file)` - tells you if the file you have parsed is a valid calculator file
-  * `isMatch(file, calculator)` - tells you if the file is valid for this calculator
 
 Combined with `ticalc`, we can use these functions to send a TI file to a
 connected calculator:
@@ -89,7 +92,7 @@ const file = tifiles.parseFile(readFile(filename));
 if ( !tifiles.isValid(file) )
   return console.error('The file you have selected does not seem to be a valid calculator file');
 
-if ( !tifiles.isMatch(file, calculator) )
+if ( !calculator.canReceive(file) )
   return console.error(`The file you have selected does not appear to be a valid file for your ${calculator.name}`);
 
 // Assuming we received a calculator object from the `connect` event:
