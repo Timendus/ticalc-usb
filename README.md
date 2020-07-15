@@ -95,3 +95,51 @@ if ( !tifiles.isMatch(file, calculator) )
 // Assuming we received a calculator object from the `connect` event:
 await calculator.sendFile(file);
 ```
+
+## Developing
+
+The easiest way to work on this library is to work on a project that makes use
+of it. I use [ticalc.link](http://ticalc.link) for this, and if you don't have a
+project of your own in mind, you can use it too.
+
+First, check out both repositories:
+
+```bash
+git clone git@github.com:Timendus/ticalc.link.git
+git clone git@github.com:Timendus/ticalc-usb.git
+```
+
+Then, make sure your changes to `ticalc-usb` are watched and get transpiled when
+you make a change:
+
+```bash
+cd ticalc-usb
+npm install
+npm start
+```
+
+In another terminal, make sure you also have the tests running, so you don't
+break things by accident:
+
+```bash
+cd ticalc-usb
+npm run watch-tests
+```
+
+And finally, in yet another terminal, use your local `ticalc-usb` as a
+dependency for `ticalc.link` and serve the website:
+
+```bash
+cd ticalc.link
+sed -i.bak 's/"ticalc-usb": ".*"/"ticalc-usb": "file:\/\/..\/ticalc-usb"/g' package.json && rm package.json.bak
+npm install
+npm start
+```
+
+_(Note: If you don't have sed on your machine, manually replace the version
+matcher for `ticalc-usb` in `ticalc.link`'s `package.json` file with
+`file://../ticalc-usb`.)_
+
+`ticalc.link` should now be running on [localhost:8080](http://localhost:8080)
+with the local version of `ticalc-usb`. Any changes to `ticalc-usb` should
+trigger a reload of the website automatically.
