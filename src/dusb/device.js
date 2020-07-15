@@ -103,7 +103,7 @@ module.exports = class Device {
 
   async _receive() {
     const packet = await this._device.transferIn(this._inEndpoint.endpointNumber, this._inEndpoint.packetSize);
-    if ( !packet.status == 'ok' ) throw `Error in receiving data from device: ${packet.status}`;
+    if ( packet.status != 'ok' ) throw `Error in receiving data from device: ${packet.status}`;
     const buffer = new Uint8Array(packet.data.buffer);
     console.debug("🖥←📱 Received:", this._prettify(buffer));
     return buffer;
