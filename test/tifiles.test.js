@@ -56,6 +56,18 @@ describe('tifiles.js', () => {
     });
   });
 
+  describe('parsing invalid files', () => {
+    it('at least results in an invalid calc type and an incorrect size', () => {
+      const file = read('./test/binaries/ti73/readme.txt');
+      expect(file).toMatchObject({
+        calcType: 'NONE',
+        debug: {
+          sizeCorrect: false
+        }
+      });
+    });
+  });
+
   describe('parsing TI-73 files', () => {
 
     it('can parse a program file', () => {
