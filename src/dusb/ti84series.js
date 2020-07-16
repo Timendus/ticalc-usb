@@ -86,7 +86,7 @@ module.exports = class Ti84series {
     await this._d.send({
       type: v.virtualPacketTypes.DUSB_VPKT_RTS,
       data: [
-        0, entry.name.length,
+        ...b.intToBytes(entry.name.length, 2),
         ...b.asciiToBytes(entry.name, entry.name.length), 0,
         ...b.intToBytes(entry.size, 4),
         v.transferModes.SILENT,
