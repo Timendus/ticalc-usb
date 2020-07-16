@@ -90,23 +90,7 @@ module.exports = class Ti84series {
         ...b.asciiToBytes(entry.name, entry.name.length), 0,
         ...b.intToBytes(entry.size, 4),
         v.transferModes.SILENT,
-        ...b.constructParameters([
-          {
-            type: v.attributes.DUSB_AID_VAR_TYPE,
-            size: 4,
-            value: 0xF0070000 + entry.type
-          },
-          {
-            type: v.attributes.DUSB_AID_ARCHIVED,
-            size: 1,
-            value: entry.attributes && entry.attributes.archived ? 1 : 0
-          },
-          {
-            type: v.attributes.DUSB_AID_VAR_VERSION,
-            size: 4,
-            value: entry.attributes && entry.attributes.version || 0
-          }
-        ])
+        ...this._entryParameters(entry)
       ]
     })
     await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_DATA_ACK);
@@ -120,6 +104,26 @@ module.exports = class Ti84series {
     await this._d.send({
       type: v.virtualPacketTypes.DUSB_VPKT_EOT
     });
+  }
+
+  _entryParameters(entry) {
+    return b.constructParameters([
+      {
+        type: v.attributes.DUSB_AID_VAR_TYPE,
+        size: 4,
+        value: 0xF0070000 + entry.type
+      },
+      {
+        type: v.attributes.DUSB_AID_ARCHIVED,
+        size: 1,
+        value: entry.attributes && entry.attributes.archived ? 1 : 0
+      },
+      {
+        type: v.attributes.DUSB_AID_VAR_VERSION,
+        size: 4,
+        value: entry.attributes && entry.attributes.version || 0
+      }
+    ]);
   }
 
 }
