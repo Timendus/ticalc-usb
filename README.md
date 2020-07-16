@@ -39,11 +39,21 @@ const { ticalc, tifiles } = require('ticalc-usb');
 
 ### `ticalc`
 
-The `ticalc` module exposes three functions:
+The `ticalc` module exposes these functions (in the order that makes most sense
+to call them in):
 
-  * `models()` - returns an array with the names of supported calculator models, so we can show that to the user.
-  * `addEventListener(event, handler)` - allows you to subscribe to `connect` and `disconnect` events. Your event handler will be called with a calculator object as a parameter.
-  * `choose()` - triggers a WebUSB dialog in which the user can choose a supported calculator. A successful choice will lead to a `connect` event.
+  * `browserSupported()` - returns true if `ticalc-usb` can work in the current
+    browser
+  * `models()` - returns an array with the names of supported calculator models,
+    so we can show that to the user.
+  * `addEventListener(event, handler)` - allows you to subscribe to `connect`
+    and `disconnect` events. Your event handler will be called with a calculator
+    object as a parameter.
+  * `init()` - initialise the library. This binds event handlers to
+    `navigator.usb` and connects to previously connected devices. Not calling
+    this results in crappy connect/disconnect events.
+  * `choose()` - triggers a WebUSB dialog in which the user can choose a
+    supported calculator. A successful choice will lead to a `connect` event.
 
 ```javascript
 ticalc.addEventListener('connect', async calculator => {
@@ -60,6 +70,8 @@ ticalc.addEventListener('connect', async calculator => {
   }
 });
 
+// Initialise the library
+ticalc.init();
 // Ask user to pick a device
 ticalc.choose();
 ```
