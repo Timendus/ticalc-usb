@@ -35,7 +35,7 @@ module.exports = {
     }
   },
 
-  choose: async ({ catchAll }) => {
+  choose: async (catchAll = false) => {
     if ( !browserSupported() ) throw 'Browser not supported';
     if ( catchAll ) calculators.push(require('./calculators/catchAll'));
 
