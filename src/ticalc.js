@@ -35,8 +35,9 @@ module.exports = {
     }
   },
 
-  choose: async () => {
+  choose: async ({ catchAll }) => {
     if ( !browserSupported() ) throw 'Browser not supported';
+    if ( catchAll ) calculators.push(require('./calculators/catchAll'));
 
     // Ask user to pick a device
     let device;
@@ -66,12 +67,14 @@ function browserSupported() {
 async function createDevice(device) {
   // Which type of device are we dealing with?
   const deviceHandler = calculators.find(c =>
-    c.identifier.vendorId == device.vendorId &&
-    c.identifier.productId == device.productId
+    Object.keys(c.matcher).every(m => c.matcher[m] == device[m])
   );
 
-  if ( !deviceHandler )
-    throw "Woops! Could not find device handler. WebUSB's filters are more complicated than I can currently handle.";
+  // If we couldn't find it, our USB identifiers catch more than we can support
+  if ( !deviceHandler ) throw {
+    message: "Calculator model not supported",
+    device
+  };
 
   // Create calculator instance and store in cache
   const calc = await deviceHandler.connect(device);

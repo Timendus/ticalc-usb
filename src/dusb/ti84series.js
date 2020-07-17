@@ -4,9 +4,10 @@ const b = require('../byte-mangling');
 
 module.exports = class Ti84series {
 
-  constructor(device, name) {
+  constructor({device, compatibleFiles}) {
     this._d = new Device(device);
-    this.name = name;
+    this.name = device.productName;
+    this._compatibleFiles = compatibleFiles;
   }
 
   async connect() {
@@ -15,10 +16,7 @@ module.exports = class Ti84series {
   }
 
   canReceive(file) {
-    return [
-      'TI-83',
-      'TI-84 Plus'
-    ].includes(file.calcType);
+    return this._compatibleFiles.includes(file.calcType);
   }
 
   // Check if the calculator is connected and listening

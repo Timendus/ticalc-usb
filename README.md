@@ -55,6 +55,11 @@ to call them in):
   * `choose()` - triggers a WebUSB dialog in which the user can choose a
     supported calculator. A successful choice will lead to a `connect` event.
 
+Please note that both `init` and `choose` can throw an error if the user selects
+a device that is not supported. Unfortunately Texas Instruments reused their
+USB product IDs, so we can't be more specific up front. You'll probably want to
+catch this error and show the user an appropriate message.
+
 ```javascript
 ticalc.addEventListener('connect', async calculator => {
   if ( await calculator.isReady() ) {
@@ -70,10 +75,15 @@ ticalc.addEventListener('connect', async calculator => {
   }
 });
 
-// Initialise the library
-ticalc.init();
-// Ask user to pick a device
-ticalc.choose();
+try {
+  // Initialise the library
+  ticalc.init();
+  // Ask user to pick a device
+  ticalc.choose();
+} catch(e) {
+  // Handle unsupported device selected
+  console.error(e);
+}
 ```
 
 On calculator objects you can call four async methods:
