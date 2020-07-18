@@ -14,7 +14,7 @@ module.exports = {
   matcher: {
     vendorId: 0x0451,
     productId: 0xe008,
-    productName: "TI-84 Plus SE"
+    productName: "TI-84 Plus Silver Edition"
   },
 
   connect: device => new Ti84PSE({

@@ -6,9 +6,9 @@ const calculators = [
   require('./calculators/z80/ti84pt'),
 
   require('./calculators/ez80/ti83pce'),
-  require('./calculators/ez80/ti83pcep'),
+  require('./calculators/ez80/ti83pceep'),
   require('./calculators/ez80/ti84pce'),
-  require('./calculators/ez80/ti84pcep'),
+  require('./calculators/ez80/ti84pcepe'),
   require('./calculators/ez80/ti84pcet'),
 ];
 
