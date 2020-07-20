@@ -15,7 +15,7 @@ Check out [ticalc.link](http://ticalc.link) to see the library in action.
 
 This library is currently very experimental. I have successfully communicated
 with my TI-84 Plus with it, and sent files to it. However, it comes with
-absolutely no guarantees that it can handle other models or even other version
+absolutely no guarantees that it can handle other models or even other versions
 of the TI-84 Plus, nor that it can properly parse and send any file you throw at
 it. So be warned.
 
