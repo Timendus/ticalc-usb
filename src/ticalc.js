@@ -1,8 +1,10 @@
+const recorder = require('./webusb/recorder');
 const calculators = [
   require('./calculators/ti84p'),
   require('./calculators/ti84pse')
 ];
 
+let recording;
 const calcCache = {};
 const eventHandlers = {
   connect: [],
@@ -22,8 +24,8 @@ module.exports = {
     eventHandlers[evnt].push(handler);
   },
 
-  init: async () => {
-    if ( !browserSupported() ) throw 'Browser not supported';
+  init: async ({ usb }) => {
+    if ( !usb) usb = findOrCreateWebUSBRecording();
 
     attachEventHandlers();
 
@@ -35,14 +37,14 @@ module.exports = {
     }
   },
 
-  choose: async (catchAll = false) => {
-    if ( !browserSupported() ) throw 'Browser not supported';
+  choose: async ({ catchAll, usb }) => {
+    if ( !usb ) usb = findOrCreateWebUSBRecording();
     if ( catchAll ) calculators.push(require('./calculators/catchAll'));
 
     // Ask user to pick a device
     let device;
     try {
-      device = await navigator.usb.requestDevice({
+      device = await usb.requestDevice({
         filters: calculators.map(c => c.identifier)
       });
     } catch(e) {
@@ -56,7 +58,9 @@ module.exports = {
 
     // Fire connect event
     eventHandlers.connect.forEach(h => h(calc));
-  }
+  },
+
+  getRecording: () => recording
 
 };
 
@@ -101,4 +105,38 @@ function attachEventHandlers() {
     if ( !calc ) return;
     eventHandlers.disconnect.forEach(h => h(calc));
   });
+}
+
+// We work with a recorder wrapper around navigator.usb by default, so we can
+// dump the recording to the console or the user if something goes wrong. Also,
+// this allows for a clean point to inject some logging.
+function findOrCreateWebUSBRecording() {
+  if ( !browserSupported() ) throw 'Browser not supported';
+  if ( recording ) return recording;
+  recording = recorder(navigator.usb, {
+    injections: {
+      transferIn: (args, result) =>
+        console.debug("🖥←📱 Received:", prettify(new Uint8Array(result.data.buffer))),
+      transferOut: (args, result) =>
+        console.debug("🖥→📱 Sent:    ", prettify(args[1]))
+    }
+  });
+  return recording;
+}
+
+function prettify(buffer) {
+  const hex = [...buffer].map(b =>
+    b.toString(16)
+     .toUpperCase()
+     .padStart(2, "0")
+  );
+  return [
+    hex.slice(0,4).join(''),
+    hex.slice(4,5).join(''),
+    hex.length > 10 ? [
+      hex.slice(5,9).join(''),
+      hex.slice(9,11).join(''),
+      hex.slice(11).join(',')
+    ] : hex.slice(5).join(',')
+  ].flat().join(' ');
 }

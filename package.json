@@ -15,7 +15,8 @@
   "devDependencies": {
     "jest": "^26.1.0",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webusb": "^2.0.2"
   },
   "repository": {
     "type": "git",
