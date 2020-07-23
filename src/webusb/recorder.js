@@ -63,9 +63,9 @@ class Recorder {
     .then(res => {
       this._logStep({
         action: 'asyncFunctionCall',
-        name: prop,
-        parameters: args,
-        resolve: res
+        name: prop.toString(),
+        parameters: safe(args),
+        resolve: safe(res)
       });
       this._inject(res, prop, args);
       return res;
@@ -73,9 +73,9 @@ class Recorder {
     .catch(err => {
       this._logStep({
         action: 'asyncFunctionCall',
-        name: prop,
-        parameters: args,
-        reject: err
+        name: prop.toString(),
+        parameters: safe(args),
+        reject: safe(err)
       });
       this._inject(err, prop, args);
       return err;
@@ -85,9 +85,9 @@ class Recorder {
   _logFunctionCall(result, prop, args) {
     this._logStep({
       action: 'functionCall',
-      name: prop,
-      parameters: args,
-      result
+      name: prop.toString(),
+      parameters: safe(args),
+      result: safe(result)
     });
     this._inject(result, prop, args);
     return result;
@@ -97,7 +97,7 @@ class Recorder {
     this._logStep({
       action: 'propertyAccess',
       name: prop.toString(),
-      result
+      result: safe(result)
     });
     return result;
   }
@@ -113,4 +113,28 @@ class Recorder {
     this._options.injections[prop](args, result);
   }
 
+}
+
+function safe(variable) {
+  // false, undefined, null are already safe enough
+  if ( !variable ) return variable;
+
+  // Make a deep copy of the object / array / value, so the software can't mess
+  // it up anymore between here and when we save it to file.
+  let safevar = JSON.parse(JSON.stringify(variable));
+
+  // DataViews are a special snowflake, we can't just JSON.stringify those.
+  if ( variable instanceof DataView )
+    return {
+      byteLength: variable.byteLength,
+      byteOffset: variable.byteOffset,
+      buffer: Array.from(new Uint8Array(variable.buffer))
+    };
+
+  // Recursively apply the same treatment, because any of the child objects
+  // can potentially be a DataView object
+  if ( typeof variable == 'object' )
+    for ( let prop in variable ) safevar[prop] = safe(variable[prop]);
+
+  return safevar;
 }

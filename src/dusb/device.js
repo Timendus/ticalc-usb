@@ -21,8 +21,8 @@ module.exports = class Device {
     // Claim the interface and its two endpoints
     const iface = this._device.configuration.interfaces[0];
     await this._device.claimInterface(iface.interfaceNumber);
-    this._inEndpoint  = iface.alternate.endpoints.find(e => e.direction == 'in');
-    this._outEndpoint = iface.alternate.endpoints.find(e => e.direction == 'out');
+    this._inEndpoint  = iface.alternates[0].endpoints.find(e => e.direction == 'in');
+    this._outEndpoint = iface.alternates[0].endpoints.find(e => e.direction == 'out');
 
     // Ask the device for the max buffer size
     this._bufferSize = await this._requestBufferSize();
