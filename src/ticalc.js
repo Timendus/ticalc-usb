@@ -82,7 +82,7 @@ async function createDevice(device) {
 
   // Create calculator instance and store in cache
   const calc = await deviceHandler.connect(device);
-  calcCache[device] = calc;
+  calcCache[device.toString()] = calc;
 
   return calc;
 }

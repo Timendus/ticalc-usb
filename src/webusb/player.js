@@ -26,13 +26,16 @@ class Player {
   }
 
   async getDevices() {
-    // TODO
+    throw 'Replays of getDevices not implemented';
+  }
+
+  unplayedSteps() {
+    return this._replay.filter(step => !step.played);
   }
 
   _USBDevice(device) {
     return new Proxy({}, {
       get: (_, prop) => {
-        let step;
         switch(prop) {
 
           // A function was accessed on the device
@@ -44,31 +47,24 @@ class Player {
           case 'claimInterface':
           case 'selectConfiguration':
           case 'open':
+          case 'toString':
             return this._expectFunction(prop);
 
           // A property was accessed on the object
 
           default:
-            step = this._replay.find(step => step.name == prop);
-            if ( step && step.action == 'propertyAccess' ) {
-              if ( this._options.verbose ) console.log(step);
-              return step.result;
-            }
-            if ( prop in device ) {
-              console.log(`Warning: Unlogged read of property '${prop}', value:`, device[prop]);
-              return device[prop];
-            }
+            return this._expectProperty(prop, device);
 
         }
       }
     });
   }
 
-  _expectFunction(name, options) {
-    // If calls to this function don't depend on ordering with other functions,
-    // at least it will depend on ordering with itself.
+  _expectProperty(name, device, options) {
+    // If access of this property doesn't depend on ordering with other
+    // properties or functions, at least it will depend on ordering with itself.
     const inOrderWith = options && options.inOrderWith || [name];
-    const marker = inOrderWith.sort().join(', ');
+    const marker = 'prop(s) ' + inOrderWith.sort().join(', ');
 
     if ( !(marker in this._currentStep) )
       this._currentStep[marker] = 0;
@@ -77,7 +73,43 @@ class Player {
 
     const steps = this._replay.filter(step => inOrderWith.includes(step.name));
     this._expect(
-      `there to be at least ${this._currentStep[marker] + 1} steps for function(s) '${marker}'`,
+      `there to be at least ${this._currentStep[marker] + 1} steps for '${marker}'`,
+      this._currentStep[marker] < steps.length,
+      steps
+    );
+
+    const step = steps[this._currentStep[marker]];
+    step.currentCall = this._currentStep[marker];
+
+    if ( step && step.action == 'propertyAccess' ) {
+      step.played = true;
+      if ( this._options.verbose ) console.log(step);
+      return step.result;
+    }
+    if ( name in device ) {
+      console.log(`Warning: Unlogged read of property '${name}', value:`, device[name]);
+      return device[name];
+    }
+    throw {
+      name: 'ReplayError',
+      message: `The application accessed unknown property '${name}'.`
+    };
+  }
+
+  _expectFunction(name, options) {
+    // If calls to this function don't depend on ordering with other functions,
+    // at least it will depend on ordering with itself.
+    const inOrderWith = options && options.inOrderWith || [name];
+    const marker = 'function(s) ' + inOrderWith.sort().join(', ');
+
+    if ( !(marker in this._currentStep) )
+      this._currentStep[marker] = 0;
+    else
+      this._currentStep[marker]++;
+
+    const steps = this._replay.filter(step => inOrderWith.includes(step.name));
+    this._expect(
+      `there to be at least ${this._currentStep[marker] + 1} steps for '${marker}'`,
       this._currentStep[marker] < steps.length,
       steps
     );
@@ -94,6 +126,8 @@ class Player {
       JSON.stringify(params) == JSON.stringify(step.parameters),
       step
     );
+
+    step.played = true;
 
     if ( this._options.verbose )
       console.log(step);
