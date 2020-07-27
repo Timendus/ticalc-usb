@@ -1,6 +1,9 @@
 [![Build Status](https://travis-ci.org/Timendus/ticalc-usb.svg?branch=master)](https://travis-ci.org/Timendus/ticalc-usb)
+[![Version on NPM](https://img.shields.io/npm/v/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
+[![Downloads on NPM](https://img.shields.io/npm/dt/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
 [![Maintainability](https://api.codeclimate.com/v1/badges/06bc064d98df904cc4b7/maintainability)](https://codeclimate.com/github/Timendus/ticalc-usb/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/06bc064d98df904cc4b7/test_coverage)](https://codeclimate.com/github/Timendus/ticalc-usb/test_coverage)
+[![License](https://img.shields.io/github/license/timendus/ticalc-usb)](LICENSE)
 
 # ticalc-usb
 
@@ -39,8 +42,7 @@ const { ticalc, tifiles } = require('ticalc-usb');
 
 ### `ticalc`
 
-The `ticalc` module exposes these functions (in the order that makes most sense
-to call them in):
+The `ticalc` module exposes these regular functions:
 
   * `browserSupported()` - returns true if `ticalc-usb` can work in the current
     browser
@@ -49,21 +51,28 @@ to call them in):
   * `addEventListener(event, handler)` - allows you to subscribe to `connect`
     and `disconnect` events. Your event handler will be called with a calculator
     object as a parameter.
+
+And these async functions:
+
   * `init()` - initialise the library. This binds event handlers to
     `navigator.usb` and connects to previously connected devices. Not calling
     this results in crappy connect/disconnect events.
   * `choose()` - triggers a WebUSB dialog in which the user can choose a
     supported calculator. A successful choice will lead to a `connect` event.
 
-Please note that both `init` and `choose` can throw an error if the user selects
-a device that is not supported. Unfortunately Texas Instruments reused their
-USB product IDs, so we can't be more specific up front. You'll probably want to
-catch this error and show the user an appropriate message.
+Please note that the Promises that both `init` and `choose` return can be
+rejected if the user selects a device that is not supported. Unfortunately Texas
+Instruments reused their USB product IDs, so we can't be more specific up front.
+You'll probably want to catch this error and show the user an appropriate
+message.
+
+A somewhat complete example:
 
 ```javascript
 ticalc.addEventListener('connect', async calculator => {
   if ( await calculator.isReady() ) {
-    // Type "HELLO":
+    // Type "HELLO", key values for TI-83/84 Plus taken from
+    // https://github.com/debrouxl/tilibs/blob/master/libticalcs/trunk/src/keys83p.h
     await calculator.pressKey(0xA1);
     await calculator.pressKey(0x9E);
     await calculator.pressKey(0xA5);
@@ -77,16 +86,20 @@ ticalc.addEventListener('connect', async calculator => {
 
 try {
   // Initialise the library
-  ticalc.init();
-  // Ask user to pick a device
-  ticalc.choose();
+  await ticalc.init();
+
+  // Ask user to pick a device. Don't do this on page load, browsers don't like
+  // that, plus `init` may already have fired a `connect` event. Call this
+  // function when the user clicks on a button.
+  await ticalc.choose();
 } catch(e) {
   // Handle unsupported device selected
   console.error(e);
 }
 ```
 
-On calculator objects you can call four async methods:
+On calculator objects you can call four async methods, three of which are shown
+in the example above:
 
   * `isReady()` - return true if calculator is connected and listening
   * `pressKey(key)` - remotely press a key on the calculator
@@ -119,6 +132,50 @@ if ( !calculator.canReceive(file) )
 
 // Assuming we received a calculator object from the `connect` event:
 await calculator.sendFile(file);
+```
+
+### Special features
+
+The `init` and `choose` functions can take an options object. This exposes some
+special features that most people will not need, but do come in handy sometimes.
+
+#### Accept any Texas Instruments device
+
+If you want your user to be able to select any possible TI device, not just the
+ones that are officially supported, you can do this:
+
+```javascript
+await ticalc.choose({ catchAll: true });
+```
+
+I use that in [ticalc.link](http://ticalc.link) to allow users to submit support
+requests for unsupported devices.
+
+#### Injecting a different WebUSB object
+
+By default, `ticalc-usb` will check to see if your web browser supports WebUSB
+and then take `navigator.usb` and wrap it in an object that adds logging and
+recording for debugging purposes. You can override this behaviour by supplying
+another object that implements the WebUSB API.
+
+For example, you can use
+[thegecko's Node.js WebUSB implementation](https://github.com/thegecko/webusb)
+by handing it to `init` and `choose`:
+
+```javascript
+const usb = require('webusb').usb;
+await ticalc.init({ usb });
+await ticalc.choose({ usb });
+```
+
+#### Getting the debug recording
+
+The default WebUSB wrapper records all interactions with the WebUSB API. You can
+get the recording by asking `ticalc` for it. `ticalc.getRecording()` returns an
+instance of [Recorder](src/webusb/recorder.js).
+
+```javascript
+const recording = ticalc.getRecording().getSteps();
 ```
 
 ## Developing

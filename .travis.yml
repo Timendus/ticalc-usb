@@ -1,4 +1,10 @@
 language: node_js
+sudo: false
+addons:
+  apt:
+    packages:
+      - libusb-1.0-0-dev
+      - libudev-dev
 node_js:
   - node
 env:
