@@ -1,7 +1,9 @@
 [![Build Status](https://travis-ci.org/Timendus/ticalc-usb.svg?branch=master)](https://travis-ci.org/Timendus/ticalc-usb)
+[![Version on NPM](https://img.shields.io/npm/v/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
+[![Downloads on NPM](https://img.shields.io/npm/dt/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
 [![Maintainability](https://api.codeclimate.com/v1/badges/06bc064d98df904cc4b7/maintainability)](https://codeclimate.com/github/Timendus/ticalc-usb/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/06bc064d98df904cc4b7/test_coverage)](https://codeclimate.com/github/Timendus/ticalc-usb/test_coverage)
-[![Downloads in NPM](https://img.shields.io/npm/dt/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
+[![License](https://img.shields.io/github/license/timendus/ticalc-usb)](LICENSE)
 
 # ticalc-usb
 
@@ -143,15 +145,38 @@ If you want your user to be able to select any possible TI device, not just the
 ones that are officially supported, you can do this:
 
 ```javascript
-await choose({ catchAll: true });
+await ticalc.choose({ catchAll: true });
 ```
 
 I use that in [ticalc.link](http://ticalc.link) to allow users to submit support
 requests for unsupported devices.
 
-#### Inject a different WebUSB object
+#### Injecting a different WebUSB object
 
-TODO
+By default, `ticalc-usb` will check to see if your web browser supports WebUSB
+and then take `navigator.usb` and wrap it in an object that adds logging and
+recording for debugging purposes. You can override this behaviour by supplying
+another object that implements the WebUSB API.
+
+For example, you can use
+[thegecko's Node.js WebUSB implementation](https://github.com/thegecko/webusb)
+by handing it to `init` and `choose`:
+
+```javascript
+const usb = require('webusb').usb;
+await ticalc.init({ usb });
+await ticalc.choose({ usb });
+```
+
+#### Getting the debug recording
+
+The default WebUSB wrapper records all interactions with the WebUSB API. You can
+get the recording by asking `ticalc` for it. `ticalc.getRecording()` returns an
+instance of [Recorder](src/webusb/recorder.js).
+
+```javascript
+const recording = ticalc.getRecording().getSteps();
+```
 
 ## Developing
 
