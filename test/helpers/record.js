@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// This executable command line tool generates a replay file of a default set of
+// interactions with a connected calculator.
+
 const fs = require('fs');
 const usb = require("webusb").usb;
 const recorder = require("../../src/webusb/recorder");

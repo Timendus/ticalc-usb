@@ -1,10 +1,10 @@
-const replay = require('./replay');
+const replay = require('../helpers/replay');
 let calculator;
 
 describe('TI-84 Plus support', () => {
 
   beforeAll(() =>
-    replay.load('./test/replays/ti84p.json')
+    replay.load('./test/calculators/ti84p.replay.json')
           .then(calc => calculator = calc)
   );
 
