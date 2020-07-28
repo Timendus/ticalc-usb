@@ -61,35 +61,22 @@ class Player {
   }
 
   _expectProperty(name, device, options) {
-    // If access of this property doesn't depend on ordering with other
-    // properties or functions, at least it will depend on ordering with itself.
-    const inOrderWith = options && options.inOrderWith || [name];
-    const marker = 'prop(s) ' + inOrderWith.sort().join(', ');
-
-    if ( !(marker in this._currentStep) )
-      this._currentStep[marker] = 0;
-    else
-      this._currentStep[marker]++;
-
-    const steps = this._replay.filter(step => inOrderWith.includes(step.name));
-    this._expect(
-      `there to be at least ${this._currentStep[marker] + 1} steps for '${marker}'`,
-      this._currentStep[marker] < steps.length,
-      steps
-    );
-
-    const step = steps[this._currentStep[marker]];
-    step.currentCall = this._currentStep[marker];
+    const step = this._getStep(name, options, 'prop(s)');
 
     if ( step && step.action == 'propertyAccess' ) {
       step.played = true;
       if ( this._options.verbose ) console.log(step);
       return step.result;
     }
+
+    // If we fall through, the property access wasn't in the replay. We can
+    // probably still satisfy the request though.
     if ( name in device ) {
       console.log(`Warning: Unlogged read of property '${name}', value:`, device[name]);
       return device[name];
     }
+
+    // If we fall through this too, we've got a bigger issue.
     throw {
       name: 'ReplayError',
       message: `The application accessed unknown property '${name}'.`
@@ -97,26 +84,7 @@ class Player {
   }
 
   _expectFunction(name, options) {
-    // If calls to this function don't depend on ordering with other functions,
-    // at least it will depend on ordering with itself.
-    const inOrderWith = options && options.inOrderWith || [name];
-    const marker = 'function(s) ' + inOrderWith.sort().join(', ');
-
-    if ( !(marker in this._currentStep) )
-      this._currentStep[marker] = 0;
-    else
-      this._currentStep[marker]++;
-
-    const steps = this._replay.filter(step => inOrderWith.includes(step.name));
-    this._expect(
-      `there to be at least ${this._currentStep[marker] + 1} steps for '${marker}'`,
-      this._currentStep[marker] < steps.length,
-      steps
-    );
-
-    const step = steps[this._currentStep[marker]];
-    step.currentCall = this._currentStep[marker];
-
+    const step = this._getStep(name, options, 'function(s)');
     return (...params) => this._apply(step, params);
   }
 
@@ -142,16 +110,38 @@ class Player {
       return Promise.reject(step.reject);
   }
 
+  _getStep(name, options, markerPrefix) {
+    // If access of this property doesn't depend on ordering with other
+    // properties, at least it will depend on ordering with itself.
+    const inOrderWith = options && options.inOrderWith || [name];
+    const marker = `${markerPrefix} ${inOrderWith.sort().join(', ')}`;
+
+    if ( !(marker in this._currentStep) )
+      this._currentStep[marker] = 0;
+    else
+      this._currentStep[marker]++;
+
+    const steps = this._replay.filter(step => inOrderWith.includes(step.name));
+    this._expect(
+      `there to be at least ${this._currentStep[marker] + 1} steps for '${marker}'`,
+      this._currentStep[marker] < steps.length,
+      steps
+    );
+
+    const step = steps[this._currentStep[marker]];
+    step.currentCall = this._currentStep[marker];
+    return step;
+  }
+
   _describeStep(step) {
-    return `${
-      step.action == 'propertyAccess' ?
-        'access to property' :
-        step.action == 'functionCall' ?
-          'a call to' :
-          step.action == 'asyncFunctionCall' ?
-            'an asynchronous call to' :
-            step.action
-      } '${step.name}'`;
+    switch(step.action) {
+      case 'propertyAccess':
+        return `access to property ${step.name}`;
+      case 'functionCall':
+        return `a call to ${step.name}`;
+      case 'asyncFunctionCall':
+        return `an asynchronous call to ${step.name}`;
+    }
   }
 
   _expect(descr, valid, step) {

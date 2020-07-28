@@ -8,14 +8,15 @@ const usb = require("webusb").usb;
 const recorder = require("../../src/webusb/recorder");
 const recording = recorder(usb);
 const { ticalc } = require("../../src");
+const filename = process.argv[2] || 'calc.replay.json';
 
 ticalc.addEventListener('connect', async calc => {
   if ( await calc.isReady() ) {
     const memFree = await calc.getFreeMem();
     console.log(memFree);
-    fs.writeFile('recording.json', JSON.stringify(recording.getSteps()), err => {
+    fs.writeFile(filename, JSON.stringify(recording.getSteps()), err => {
       if (err) return console.error(err);
-      console.log("Wrote recording to recording.json");
+      console.log(`Wrote recording to ${filename}`);
     });
   } else {
     console.error("Calculator is not responding or not ready");
