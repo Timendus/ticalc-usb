@@ -11,26 +11,26 @@ class Recorder {
     this._steps = [];
   }
 
-  async requestDevice(options) {
-    const device = await this._usb.requestDevice(options);
+  async requestDevice(...params) {
+    const device = await this._usb.requestDevice(...params);
     const recDevice = this._proxy(device);
     this._logStep({
-      action: 'functionCall',
+      action: 'asyncFunctionCall',
       name: 'requestDevice',
-      parameters: [ options ],
-      result: recDevice
+      parameters: params,
+      resolve: device
     });
     return recDevice;
   }
 
-  async getDevices() {
-    const devices = await this._usb.getDevices(options);
+  async getDevices(...params) {
+    const devices = await this._usb.getDevices(...params);
     const recDevices = devices.map(d => this._proxy(d));
     this._logStep({
-      action: 'functionCall',
+      action: 'asyncFunctionCall',
       name: 'getDevices',
-      parameters: [],
-      result: recDevices
+      parameters: params,
+      resolve: devices
     });
     return recDevices;
   }
@@ -78,7 +78,7 @@ class Recorder {
         reject: safe(err)
       });
       this._inject(err, prop, args);
-      return err;
+      throw err;
     });
   }
 
@@ -119,22 +119,37 @@ function safe(variable) {
   // false, undefined, null are already safe enough
   if ( !variable ) return variable;
 
-  // Make a deep copy of the object / array / value, so the software can't mess
-  // it up anymore between here and when we save it to file.
-  let safevar = JSON.parse(JSON.stringify(variable));
-
   // DataViews are a special snowflake, we can't just JSON.stringify those.
-  if ( variable instanceof DataView )
-    return {
-      byteLength: variable.byteLength,
-      byteOffset: variable.byteOffset,
-      buffer: Array.from(new Uint8Array(variable.buffer))
-    };
+  if ( variable instanceof DataView ) return safeDataView(variable);
 
-  // Recursively apply the same treatment, because any of the child objects
-  // can potentially be a DataView object
-  if ( typeof variable == 'object' )
-    for ( let prop in variable ) safevar[prop] = safe(variable[prop]);
+  // Arrays need a recursive treatment, because any of the member objects can
+  // potentially be a DataView object
+  if ( Array.isArray(variable) ) return safeArray(variable);
 
-  return safevar;
+  // Objects need a recursive treatment, because any of the child objects can
+  // potentially be a DataView object
+  if ( typeof variable == 'object' ) return safeObject(variable);
+
+  // Base case: make a deep copy of the thing, so the software can't mess it up
+  // anymore between here and when we save it to file.
+  return JSON.parse(JSON.stringify(variable));
+}
+
+function safeDataView(dataview) {
+  return {
+    byteLength: dataview.byteLength,
+    byteOffset: dataview.byteOffset,
+    buffer: Array.from(new Uint8Array(dataview.buffer))
+  };
+}
+
+function safeObject(object) {
+  return Object.keys(object).reduce((obj, key) => {
+    obj[key] = safe(object[key]);
+    return obj;
+  }, {});
+}
+
+function safeArray(array) {
+  return array.map(value => safe(value));
 }
