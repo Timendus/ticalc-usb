@@ -12,21 +12,22 @@ class Player {
   }
 
   async requestDevice(options) {
-    const device = await this._expectFunction('requestDevice')(options);
-
-    // Does this device match with the given filters?
-    if ( options.filters.some(filter =>
-      Object.keys(filter).every(prop =>
-        filter[prop] == device[prop])) )
+    try {
+      const device = await this._expectFunction('requestDevice')(options);
       return this._USBDevice(device);
-
-    throw {
-      message: "No devices found"
-    };
+    } catch(e) {
+      // If we don't have a step for 'requestDevice' with these options, then
+      // we pretend that the device is not connected.
+      if ( e.name == 'ReplayError' )
+        throw {
+          message: "No devices found"
+        };
+      throw e;
+    }
   }
 
   async getDevices() {
-    throw 'Replays of getDevices not implemented';
+    throw 'Replays of getDevices not yet implemented';
   }
 
   unplayedSteps() {
@@ -61,22 +62,26 @@ class Player {
   }
 
   _expectProperty(name, device, options) {
+    try {
+      return this._accessLoggedProperty(name, device, options);
+    } catch(e) {
+      if ( e.name == 'ReplayError' && name in device ) {
+        console.log(`Warning: Unlogged read of property '${name}', value:`, device[name]);
+        return device[name];
+      }
+      throw e;
+    }
+  }
+
+  _accessLoggedProperty(name, device, options) {
     const step = this._getStep(name, options, 'prop(s)');
 
-    if ( step && step.action == 'propertyAccess' ) {
+    if ( step.action == 'propertyAccess' ) {
       step.played = true;
       if ( this._options.verbose ) console.log(step);
       return step.result;
     }
 
-    // If we fall through, the property access wasn't in the replay. We can
-    // probably still satisfy the request though.
-    if ( name in device ) {
-      console.log(`Warning: Unlogged read of property '${name}', value:`, device[name]);
-      return device[name];
-    }
-
-    // If we fall through this too, we've got a bigger issue.
     throw {
       name: 'ReplayError',
       message: `The application accessed unknown property '${name}'.`
@@ -138,9 +143,9 @@ class Player {
       case 'propertyAccess':
         return `access to property ${step.name}`;
       case 'functionCall':
-        return `a call to ${step.name}`;
+        return `a call to ${step.name} with parameters ${JSON.stringify(step.parameters)}`;
       case 'asyncFunctionCall':
-        return `an asynchronous call to ${step.name}`;
+        return `an asynchronous call to ${step.name} with parameters ${JSON.stringify(step.parameters)}`;
     }
   }
 
