@@ -1,7 +1,7 @@
 const Ti84PCET = require('../../dusb/ti84series');
 
 module.exports = {
-  name: "TI-84 Plus Color Edition Test",
+  name: "TI-84 Plus CE-T",
 
   // This is a filter for navigator.usb.requestDevice
   // See http://www.linux-usb.org/usb.ids for IDs
@@ -14,7 +14,7 @@ module.exports = {
   matcher: {
     vendorId: 0x0451,
     productId: 0xe008,
-    productName: "TI-84 Plus Color Edition Test"
+    productName: "TI-84 Plus CE"
   },
 
   connect: device => new Ti84PCET({

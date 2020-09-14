@@ -1,4 +1,4 @@
-const Ti83PCEP = require('../../dusb/ti84series');
+const Ti83PCEEP = require('../../dusb/ti84series');
 
 module.exports = {
   name: "TI-83 Premium CE Edition Python",
@@ -17,7 +17,7 @@ module.exports = {
     productName: "TI-83 Premium CE"
   },
 
-  connect: device => new Ti83PCEP({
+  connect: device => new Ti83PCEEP({
     device,
 
     // These are the file types we can send this particular device

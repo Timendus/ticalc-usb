@@ -1,7 +1,7 @@
 const Ti83PCE = require('../../dusb/ti84series');
 
 module.exports = {
-  name: "TI-83 Premium Color Edition",
+  name: "TI-83 Premium CE",
 
   // This is a filter for navigator.usb.requestDevice
   // See http://www.linux-usb.org/usb.ids for IDs
