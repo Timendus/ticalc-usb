@@ -1,7 +1,16 @@
 const recorder = require('./webusb/recorder');
 const calculators = [
-  require('./calculators/ti84p'),
-  require('./calculators/ti84pse')
+  require('./calculators/z80/ti82a'),
+  require('./calculators/z80/ti84p'),
+  require('./calculators/z80/ti84pcse'),
+  require('./calculators/z80/ti84pse'),
+  require('./calculators/z80/ti84pt'),
+
+  require('./calculators/ez80/ti83pce'),
+  require('./calculators/ez80/ti83pceep'),
+  require('./calculators/ez80/ti84pce'),
+  require('./calculators/ez80/ti84pcetpe'),
+  require('./calculators/ez80/ti84pcet'),
 ];
 
 let recording;
