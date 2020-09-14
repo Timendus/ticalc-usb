@@ -11,13 +11,17 @@ class Recorder {
     this._steps = [];
   }
 
-  async requestDevice(...params) {
-    const device = await this._usb.requestDevice(...params);
+  async requestDevice(options = {}) {
+    if (typeof options === 'object' && options.hasOwnProperty('filters')) {
+      options.filters = options.filters.filter((v, i, a) => a.findIndex(t => (t.vendorId === v.vendorId && t.productId === v.productId)) === i)
+          .sort((a,b) => (a.vendorId > b.vendorId) ? 1 : (a.vendorId === b.vendorId) ? (a.productId < b.productId) ? 1 : -1 : -1);
+    }
+    const device = await this._usb.requestDevice(options);
     const recDevice = this._proxy(device);
     this._logStep({
       action: 'asyncFunctionCall',
       name: 'requestDevice',
-      parameters: params,
+      parameters: options,
       resolve: device
     });
     return recDevice;

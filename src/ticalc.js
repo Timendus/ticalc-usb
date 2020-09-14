@@ -50,11 +50,15 @@ module.exports = {
     if ( !usb ) usb = findOrCreateWebUSBRecording();
     if ( catchAll ) calculators.push(require('./calculators/catchAll'));
 
+    const sortedUniqueCalcFilters = calculators.map(c => c.identifier)
+        .filter((v, i, a) => a.findIndex(t => (t.vendorId === v.vendorId && t.productId === v.productId)) === i)
+        .sort((a,b) => (a.vendorId > b.vendorId) ? 1 : (a.vendorId === b.vendorId) ? (a.productId < b.productId) ? 1 : -1 : -1);
+
     // Ask user to pick a device
     let device;
     try {
       device = await usb.requestDevice({
-        filters: calculators.map(c => c.identifier)
+        filters: sortedUniqueCalcFilters
       });
     } catch(e) {
       if ( e.message == "No device selected." )
