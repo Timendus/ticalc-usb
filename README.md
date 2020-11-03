@@ -46,7 +46,7 @@ The `ticalc` module exposes these regular functions:
 
   * `browserSupported()` - returns true if `ticalc-usb` can work in the current
     browser
-  * `models()` - returns an array with the names of supported calculator models,
+  * `models()` - returns an array of objects that represent available calculator models,
     so we can show that to the user.
   * `addEventListener(event, handler)` - allows you to subscribe to `connect`
     and `disconnect` events. Your event handler will be called with a calculator

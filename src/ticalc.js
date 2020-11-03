@@ -24,7 +24,11 @@ module.exports = {
 
   browserSupported,
 
-  models: () => calculators.map(c => c.name),
+  models: () => calculators.map(c => ({
+    name:    c.name,
+    status:  c.status,
+    matcher: c.matcher
+  })),
 
   addEventListener: (evnt, handler) => {
     if ( !Object.keys(eventHandlers).includes(evnt) )
