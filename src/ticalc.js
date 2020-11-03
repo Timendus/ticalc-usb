@@ -7,10 +7,10 @@ const calculators = [
   require('./calculators/z80/ti84pt'),
 
   require('./calculators/ez80/ti83pce'),
-  require('./calculators/ez80/ti83pceep'),
+  // require('./calculators/ez80/ti83pceep'),  // Matcher is identical to ti83pce
   require('./calculators/ez80/ti84pce'),
-  require('./calculators/ez80/ti84pcetpe'),
-  require('./calculators/ez80/ti84pcet'),
+  // require('./calculators/ez80/ti84pcetpe'), // Matcher is identical to ti84pce
+  // require('./calculators/ez80/ti84pcet'),   // Matcher is identical to ti84pce
 ];
 
 let recording;
