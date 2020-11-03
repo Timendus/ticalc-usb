@@ -1,7 +1,9 @@
-const Ti84PCET = require('../../dusb/ti84series');
+// Should this calculator have its own file..?
+// Its matcher is indistinguishable from the TI84PCE...
 
-module.exports = {
+const properties = {
   name: "TI-84 Plus CE-T",
+  status: "experimental",
 
   // This is a filter for navigator.usb.requestDevice
   // See http://www.linux-usb.org/usb.ids for IDs
@@ -10,21 +12,23 @@ module.exports = {
     productId: 0xe008
   },
 
-  // This is the matcher used to find this specific device
+  // This is the matcher used to identify this specific device
   matcher: {
     vendorId: 0x0451,
     productId: 0xe008,
     productName: "TI-84 Plus CE"
   },
 
-  connect: device => new Ti84PCET({
-    device,
+  // These are the file types we can send this particular device
+  compatibleFiles: [
+    'TI-83',
+    'TI-84 Plus',
+    'TI-84 Plus Color'
+  ]
+};
 
-    // These are the file types we can send this particular device
-    compatibleFiles: [
-      'TI-83',
-      'TI-84 Plus',
-      'TI-84 Plus Color'
-    ]
-  }).connect()
-}
+const Calculator = require('../../dusb/ti84series');
+module.exports = {
+  ...properties,
+  connect: device => new Calculator({ device, properties }).connect()
+};
