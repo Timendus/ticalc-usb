@@ -11,13 +11,13 @@ class Recorder {
     this._steps = [];
   }
 
-  async requestDevice(options = {}) {
-    const device = await this._usb.requestDevice(options);
+  async requestDevice(...params) {
+    const device = await this._usb.requestDevice(...params);
     const recDevice = this._proxy(device);
     this._logStep({
       action: 'asyncFunctionCall',
       name: 'requestDevice',
-      parameters: options,
+      parameters: params,
       resolve: device
     });
     return recDevice;

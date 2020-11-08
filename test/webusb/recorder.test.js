@@ -28,7 +28,7 @@ const requestDeviceSteps = [
   {
     action: 'asyncFunctionCall',
     name: 'requestDevice',
-    parameters: options,
+    parameters: [ options ],
     resolve: {
       myOptions: expect.any(Function),
       myFunc: expect.any(Function),
