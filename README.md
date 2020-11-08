@@ -64,7 +64,7 @@ Please note that the Promises that both `init` and `choose` return can be
 rejected if the user selects a device that is not supported. Unfortunately Texas
 Instruments reused their USB product IDs, so we can't be more specific up front.
 You'll probably want to catch this error and show the user an appropriate
-message.
+message. Also, `choose` will reject if the user selects no device at all.
 
 A somewhat complete example:
 
@@ -93,7 +93,7 @@ try {
   // function when the user clicks on a button.
   await ticalc.choose();
 } catch(e) {
-  // Handle unsupported device selected
+  // Handle unsupported or no device selected
   console.error(e);
 }
 ```
@@ -127,10 +127,10 @@ const file = tifiles.parseFile(readFile(filename));
 if ( !tifiles.isValid(file) )
   return console.error('The file you have selected does not seem to be a valid calculator file');
 
+// Assuming we received a calculator object from the `connect` event
 if ( !calculator.canReceive(file) )
   return console.error(`The file you have selected does not appear to be a valid file for your ${calculator.name}`);
 
-// Assuming we received a calculator object from the `connect` event:
 await calculator.sendFile(file);
 ```
 
@@ -139,17 +139,26 @@ await calculator.sendFile(file);
 The `init` and `choose` functions can take an options object. This exposes some
 special features that most people will not need, but do come in handy sometimes.
 
-#### Accept any Texas Instruments device
+#### Choosing the right support level
 
-If you want your user to be able to select any possible TI device, not just the
-ones that are officially supported, you can do this:
+By default, `ticalc-usb` will only successfully resolve the `choose` promise if
+the connected calculator has the status `supported`. You can be more adventurous
+and also allow calculators that have `partial-support`, `beta` support or that
+are `experimental`.
+
+If you want your user to be able to select any possible Texas Instruments
+device, not just the ones that have any support at all, use `none`.
+
+You have to pass this alternative `supportLevel` as an option to the `init`
+function:
 
 ```javascript
-await ticalc.choose({ catchAll: true });
+await ticalc.init({ supportLevel: 'beta' });
 ```
 
-I use that in [ticalc.link](http://ticalc.link) to allow users to submit support
-requests for unsupported devices.
+I use this feature in [ticalc.link](http://ticalc.link) to allow users to
+experiment with newly added devices, and to submit support requests for
+unsupported devices.
 
 #### Injecting a different WebUSB object
 
