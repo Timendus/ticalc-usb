@@ -65,15 +65,11 @@ module.exports = {
   choose: async ({ usb }) => {
     if ( !usb ) usb = findOrCreateWebUSBRecording();
 
-    const sortedUniqueCalcFilters = calculators.map(c => c.identifier)
-        .filter((v, i, a) => a.findIndex(t => (t.vendorId === v.vendorId && t.productId === v.productId)) === i)
-        .sort((a,b) => (a.vendorId > b.vendorId) ? 1 : (a.vendorId === b.vendorId) ? (a.productId < b.productId) ? 1 : -1 : -1);
-
     // Ask user to pick a device
     let device;
     try {
       device = await usb.requestDevice({
-        filters: sortedUniqueCalcFilters
+        filters: sortedUniqueFilters()
       });
     } catch(e) {
       throw e;
@@ -89,6 +85,21 @@ module.exports = {
   getRecording: () => recording
 
 };
+
+function sortedUniqueFilters() {
+  return calculators.map(c => c.identifier)
+                    // Unique by both properties
+                    .filter((v, i, a) => i === a.findIndex(
+                      t => t.vendorId  === v.vendorId &&
+                           t.productId === v.productId
+                    ))
+                    // Sort by both properties
+                    .sort((a, b) => {
+                      if ( a.vendorId > b.vendorId ) return 1;
+                      if ( a.vendorId < b.vendorId ) return -1;
+                      return ( a.productId < b.productId ) ? 1 : -1;
+                    });
+}
 
 function calculatorsForSupportLevel(level) {
   // Set default to 'supported', so consumers don't get nasty surprises
