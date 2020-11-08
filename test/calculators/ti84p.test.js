@@ -34,7 +34,7 @@ describe('TI-84 Plus support', () => {
 
     it('gets the amount of free memory', async () => {
       expect(await calculator.getFreeMem()).toEqual({
-        ram:   23407,
+        ram:   23370,
         flash: 415043
       });
     });
