@@ -48,9 +48,9 @@ module.exports = {
     eventHandlers[evnt].push(handler);
   },
 
-  init: async ({ supportLevel, usb }) => {
-    if ( !usb) usb = findOrCreateWebUSBRecording();
-    calculators = calculatorsForSupportLevel(supportLevel);
+  init: async (options = {}) => {
+    const usb = options.usb || findOrCreateWebUSBRecording();
+    calculators = calculatorsForSupportLevel(options.supportLevel);
 
     attachEventHandlers();
 
@@ -62,8 +62,8 @@ module.exports = {
     }
   },
 
-  choose: async ({ usb }) => {
-    if ( !usb ) usb = findOrCreateWebUSBRecording();
+  choose: async (options = {}) => {
+    const usb = options.usb || findOrCreateWebUSBRecording();
 
     // Ask user to pick a device
     let device;
