@@ -1,5 +1,5 @@
 const recorder = require('./webusb/recorder');
-const calculators = [
+const availableCalculators = [
   require('./calculators/z80/ti82a'),
   require('./calculators/z80/ti84p'),
   require('./calculators/z80/ti84pcse'),
@@ -13,7 +13,18 @@ const calculators = [
   // require('./calculators/ez80/ti84pcet'),   // Matcher is identical to ti84pce
 ];
 
+// Note: this list must be ordered from least to most supported
+const supportLevels = [
+  'none',
+  'experimental',
+  'beta',
+  'partial-support',
+  'supported'
+];
+
+let calculators = calculatorsForSupportLevel();
 let recording;
+
 const calcCache = {};
 const eventHandlers = {
   connect: [],
@@ -24,7 +35,7 @@ module.exports = {
 
   browserSupported,
 
-  models: () => calculators.map(c => ({
+  models: () => availableCalculators.map(c => ({
     name:    c.name,
     status:  c.status,
     matcher: c.matcher
@@ -37,8 +48,9 @@ module.exports = {
     eventHandlers[evnt].push(handler);
   },
 
-  init: async ({ usb }) => {
+  init: async ({ supportLevel, usb }) => {
     if ( !usb) usb = findOrCreateWebUSBRecording();
+    calculators = calculatorsForSupportLevel(supportLevel);
 
     attachEventHandlers();
 
@@ -50,9 +62,8 @@ module.exports = {
     }
   },
 
-  choose: async ({ catchAll, usb }) => {
+  choose: async ({ usb }) => {
     if ( !usb ) usb = findOrCreateWebUSBRecording();
-    if ( catchAll ) calculators.push(require('./calculators/catchAll'));
 
     const sortedUniqueCalcFilters = calculators.map(c => c.identifier)
         .filter((v, i, a) => a.findIndex(t => (t.vendorId === v.vendorId && t.productId === v.productId)) === i)
@@ -80,6 +91,20 @@ module.exports = {
   getRecording: () => recording
 
 };
+
+function calculatorsForSupportLevel(level) {
+  // Set default to 'supported', so consumers don't get nasty surprises
+  if ( !level ) level = 'supported';
+
+  if ( !supportLevels.includes(level) )
+    throw 'Invalid support level selected, should be one of: ' + supportLevels.join(', ');
+
+  if ( level == 'none' )
+    return availableCalculators.concat(require('./calculators/catchAll'));
+
+  const supportedLevels = supportLevels.slice(supportLevels.indexOf(level));
+  return availableCalculators.filter(c => supportedLevels.includes(c.status));
+}
 
 function browserSupported() {
   return !!navigator.usb;
