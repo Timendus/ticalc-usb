@@ -29,7 +29,8 @@ class Player {
       // we pretend that the device is not connected.
       if ( e.name == 'ReplayError' )
         throw {
-          message: "No devices found"
+          message: "No device selected.",
+          error: e
         };
       throw e;
     }

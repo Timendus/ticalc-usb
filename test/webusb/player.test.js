@@ -55,7 +55,7 @@ describe('WebUSB Player', () => {
           ]
         });
       } catch(e) {
-        expect(e.message).toEqual('No devices found');
+        expect(e.message).toEqual('No device selected.');
       }
     });
 

@@ -76,8 +76,6 @@ module.exports = {
         filters: sortedUniqueCalcFilters
       });
     } catch(e) {
-      if ( e.message == "No device selected." )
-        return;
       throw e;
     }
 
