@@ -3,15 +3,6 @@
 
 module.exports = (replay, options) => new Player(replay, options);
 
-const objectsEqual = (o1, o2) =>
-    typeof o1 === 'object' && Object.keys(o1).length > 0
-    ? Object.keys(o1).length === Object.keys(o2).length
-        && Object.keys(o1).every(p => objectsEqual(o1[p], o2[p]))
-    : o1 === o2;
-
-const arraysEqual = (a1, a2) =>
-    a1.length === a2.length && a1.every((o, idx) => objectsEqual(o, a2[idx]));
-
 class Player {
 
   constructor(replay, options = {}) {
@@ -106,9 +97,7 @@ class Player {
   _apply(step, params) {
     this._expect(
       `the parameters to call #${step.currentCall + 1} to ${step.name} to be '${JSON.stringify(params)}', but the recording shows ${this._describeStep(step)} instead`,
-        (params instanceof Array ? arraysEqual(params, step.parameters)
-         : typeof params === 'object' ? objectsEqual(params, step.parameters)
-         : JSON.stringify(params) === JSON.stringify(step.parameters)),
+      this._parametersEqual(params, step.parameters),
       step
     );
 
@@ -167,6 +156,22 @@ class Player {
       message: `The application expected ${descr}.`,
       step
     };
+  }
+
+  _parametersEqual(p1, p2) {
+    if ( p1 instanceof Array ) return this._arraysEqual(p1, p2);
+    if ( typeof p1 == 'object' ) return this._objectsEqual(p1, p2);
+    return JSON.stringify(p1) == JSON.stringify(p2);
+  }
+
+  _arraysEqual(a1, a2) {
+    return a1.length === a2.length &&
+           a1.every((o, i) => this._parametersEqual(o, a2[i]));
+  }
+
+  _objectsEqual(o1, o2) {
+    return Object.keys(o1).length === Object.keys(o2).length &&
+           Object.keys(o1).every(k => this._parametersEqual(o1[k], o2[k]));
   }
 
 }
