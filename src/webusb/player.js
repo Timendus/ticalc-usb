@@ -13,7 +13,9 @@ class Player {
 
   async requestDevice(options) {
     try {
-      const device = await this._expectFunction('requestDevice')(options);
+      const device = await this._expectFunction('requestDevice', {
+        requiredMatcher: this._options.requiredMatcher
+      })(options);
       return this._USBDevice(device);
     } catch(e) {
       // If we don't have a step for 'requestDevice' with these options, then
@@ -89,18 +91,27 @@ class Player {
     };
   }
 
-  _expectFunction(name, options) {
+  _expectFunction(name, options = {}) {
     const step = this._getStep(name, options, 'function(s)');
-    return (...params) => this._apply(step, params);
+    return (...params) => {
+      if ( options.requiredMatcher ) {
+        this._expect(
+          `the filters to call #${step.currentCall + 1} to ${step.name} to contain ${JSON.stringify(options.requiredMatcher)}. Live parameters: '${JSON.stringify(params)}'. Recording step: ${this._describeStep(step)}.`,
+          this._filtersContain(params, step.parameters, options.requiredMatcher),
+          step
+        );
+      } else {
+        this._expect(
+          `the parameters to call #${step.currentCall + 1} to ${step.name} to be '${JSON.stringify(params)}', but the recording shows ${this._describeStep(step)} instead`,
+          this._parametersEqual(params, step.parameters),
+          step
+        );
+      }
+      return this._apply(step, params);
+    }
   }
 
   _apply(step, params) {
-    this._expect(
-      `the parameters to call #${step.currentCall + 1} to ${step.name} to be '${JSON.stringify(params)}', but the recording shows ${this._describeStep(step)} instead`,
-      this._parametersEqual(params, step.parameters),
-      step
-    );
-
     step.played = true;
 
     if ( this._options.verbose )
@@ -116,7 +127,7 @@ class Player {
       return Promise.reject(step.reject);
   }
 
-  _getStep(name, options, markerPrefix) {
+  _getStep(name, options = {}, markerPrefix) {
     // If access of this property doesn't depend on ordering with other
     // properties, at least it will depend on ordering with itself.
     const inOrderWith = options && options.inOrderWith || [name];
@@ -156,6 +167,14 @@ class Player {
       message: `The application expected ${descr}.`,
       step
     };
+  }
+
+  _filtersContain(p1, p2, m) {
+    const filters1 = p1[0] && p1[0].filters;
+    const filters2 = p2[0] && p2[0].filters;
+    const matchFunc = f => f.vendorId == m.vendorId && f.productId == m.productId;
+    return filters1 && filters1.some(matchFunc) &&
+           filters2 && filters2.some(matchFunc);
   }
 
   _parametersEqual(p1, p2) {

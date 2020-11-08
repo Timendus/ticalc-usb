@@ -4,15 +4,16 @@
 const fs = require('fs');
 const player = require("../../src/webusb/player");
 const { ticalc } = require("../../src");
-let replay;
+let replayPlayer;
 
 module.exports = {
-  load: file => {
+  load: ({ calculator, replay }) => {
     return new Promise((resolve, reject) => {
       try {
-        replay = player(JSON.parse(fs.readFileSync(file, 'utf8')));
+        replay = JSON.parse(fs.readFileSync(replay, 'utf8'));
+        replayPlayer = player(replay, { requiredMatcher: calculator.matcher });
         ticalc.addEventListener('connect', calc => resolve(calc));
-        ticalc.choose({ usb: replay })
+        ticalc.choose({ usb: replayPlayer })
               .catch(e => reject(e));
       } catch(e) {
         reject(e);
@@ -20,5 +21,5 @@ module.exports = {
     });
   },
 
-  unplayedSteps: () => replay.unplayedSteps()
+  unplayedSteps: () => replayPlayer.unplayedSteps()
 };

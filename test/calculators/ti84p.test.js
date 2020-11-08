@@ -1,12 +1,15 @@
 const replay = require('../helpers/replay');
+const TI84P = require('../../src/calculators/z80/ti84p');
 let calculator;
 
 describe('TI-84 Plus support', () => {
 
-  beforeAll(() =>
-    replay.load('./test/calculators/ti84p.replay.json')
-          .then(calc => calculator = calc)
-  );
+  beforeAll(async () => {
+    calculator = await replay.load({
+      calculator: TI84P,
+      replay: './test/calculators/ti84p.replay.json'
+    });
+  });
 
   describe('the device', () => {
     it('is recognized as a TI-84 Plus', () => {
