@@ -121,9 +121,11 @@ function browserSupported() {
 
 async function createDevice(device) {
   // Which type of device are we dealing with?
-  const deviceHandler = calculators.find(c =>
-    Object.keys(c.matcher).every(m => c.matcher[m] == device[m])
-  );
+  const deviceHandler = calculators
+    .filter(c => c.matcher)
+    .find(c =>
+      Object.keys(c.matcher).every(m => c.matcher[m] == device[m])
+    );
 
   // If we couldn't find it, our USB identifiers catch more than we can support
   if ( !deviceHandler ) throw {
