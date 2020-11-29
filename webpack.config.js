@@ -8,6 +8,7 @@ module.exports = {
   },
 
   output: {
+    globalObject: 'this',
     library: 'ticalc-usb',
     libraryTarget: 'umd',
     path: path.join(__dirname, 'dist'),

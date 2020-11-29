@@ -1,34 +1,21 @@
-const name = "TI-84 Plus";
-
-module.exports = {
-  name,
-
-  // This is a filter for navigator.usb.requestDevice
-  // See http://www.linux-usb.org/usb.ids for IDs
-  identifier: {
-    vendorId: 0x0451,
-    productId: 0xe003
-  },
-
-  // `connect` function should return an object that conforms to a "being a
-  // calculator" interface. To be more precisely defined.
-  connect: device => new Ti84P(device).connect()
-}
-
 const Device = require('../dusb/device');
 const v = require('../dusb/magic-values');
 const b = require('../byte-mangling');
 
-class Ti84P {
+module.exports = class Ti84series {
 
-  constructor(device) {
+  constructor({device, properties}) {
     this._d = new Device(device);
-    this.name = name;
+    Object.assign(this, properties);
   }
 
   async connect() {
     await this._d.connect();
     return this;
+  }
+
+  canReceive(file) {
+    return this.compatibleFiles.includes(file.calcType);
   }
 
   // Check if the calculator is connected and listening
@@ -96,27 +83,11 @@ class Ti84P {
     await this._d.send({
       type: v.virtualPacketTypes.DUSB_VPKT_RTS,
       data: [
-        0, entry.name.length,
+        ...b.intToBytes(entry.name.length, 2),
         ...b.asciiToBytes(entry.name, entry.name.length), 0,
         ...b.intToBytes(entry.size, 4),
         v.transferModes.SILENT,
-        ...b.constructParameters([
-          {
-            type: v.attributes.DUSB_AID_VAR_TYPE,
-            size: 4,
-            value: 0xF0070000 + entry.type
-          },
-          {
-            type: v.attributes.DUSB_AID_ARCHIVED,
-            size: 1,
-            value: entry.attributes && entry.attributes.archived ? 1 : 0
-          },
-          {
-            type: v.attributes.DUSB_AID_VAR_VERSION,
-            size: 4,
-            value: entry.attributes && entry.attributes.version || 0
-          }
-        ])
+        ...this._entryParameters(entry)
       ]
     })
     await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_DATA_ACK);
@@ -130,6 +101,26 @@ class Ti84P {
     await this._d.send({
       type: v.virtualPacketTypes.DUSB_VPKT_EOT
     });
+  }
+
+  _entryParameters(entry) {
+    return b.constructParameters([
+      {
+        type: v.attributes.DUSB_AID_VAR_TYPE,
+        size: 4,
+        value: 0xF0070000 + entry.type
+      },
+      {
+        type: v.attributes.DUSB_AID_ARCHIVED,
+        size: 1,
+        value: entry.attributes && entry.attributes.archived ? 1 : 0
+      },
+      {
+        type: v.attributes.DUSB_AID_VAR_VERSION,
+        size: 4,
+        value: entry.attributes && entry.attributes.version || 0
+      }
+    ]);
   }
 
 }

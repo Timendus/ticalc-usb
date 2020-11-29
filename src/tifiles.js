@@ -37,9 +37,7 @@ module.exports = {
     file.calcType != 'NONE' &&
     file.size > 0 &&
     file.debug.sizeCorrect &&
-    file.entries.length > 0,
-
-  isMatch: (file, calculator) => file.calcType == calculator.name
+    file.entries.length > 0
 
 }
 

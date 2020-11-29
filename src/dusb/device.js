@@ -21,13 +21,11 @@ module.exports = class Device {
     // Claim the interface and its two endpoints
     const iface = this._device.configuration.interfaces[0];
     await this._device.claimInterface(iface.interfaceNumber);
-    this._inEndpoint  = iface.alternate.endpoints.find(e => e.direction == 'in');
-    this._outEndpoint = iface.alternate.endpoints.find(e => e.direction == 'out');
+    this._inEndpoint  = iface.alternates[0].endpoints.find(e => e.direction == 'in');
+    this._outEndpoint = iface.alternates[0].endpoints.find(e => e.direction == 'out');
 
     // Ask the device for the max buffer size
     this._bufferSize = await this._requestBufferSize();
-
-    console.debug(`🖥↔📱 Buffer size ${this._bufferSize} bytes`);
   }
 
   // Send a virtual packet to the device
@@ -97,16 +95,13 @@ module.exports = class Device {
   }
 
   _send(buffer) {
-    console.debug("🖥→📱 Sent:    ", this._prettify(buffer));
     return this._device.transferOut(this._outEndpoint.endpointNumber, buffer);
   }
 
   async _receive() {
     const packet = await this._device.transferIn(this._inEndpoint.endpointNumber, this._inEndpoint.packetSize);
     if ( packet.status != 'ok' ) throw `Error in receiving data from device: ${packet.status}`;
-    const buffer = new Uint8Array(packet.data.buffer);
-    console.debug("🖥←📱 Received:", this._prettify(buffer));
-    return buffer;
+    return new Uint8Array(packet.data.buffer);
   }
 
   // Send a raw ack packet
@@ -123,23 +118,6 @@ module.exports = class Device {
 
     if ( response.type != v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_ACK )
       throw `Expected ACK, got ${response.type} instead`;
-  }
-
-  _prettify(buffer) {
-    const hex = [...buffer].map(b =>
-      b.toString(16)
-       .toUpperCase()
-       .padStart(2, "0")
-    );
-    return [
-      hex.slice(0,4).join(''),
-      hex.slice(4,5).join(''),
-      hex.length > 10 ? [
-        hex.slice(5,9).join(''),
-        hex.slice(9,11).join(''),
-        hex.slice(11).join(',')
-      ] : hex.slice(5).join(',')
-    ].flat().join(' ');
   }
 
 }
