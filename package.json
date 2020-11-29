@@ -1,6 +1,6 @@
 {
   "name": "ticalc-usb",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "A library to communicate with TI graphing calculators through WebUSB",
   "homepage": "https://ticalc.link",
   "main": "dist/index.js",
@@ -13,10 +13,10 @@
   },
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "jest": "^26.1.0",
-    "webpack": "^4.43.0",
+    "jest": "^26.6.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
-    "webusb": "^2.0.2"
+    "webusb": "^2.2.0"
   },
   "repository": {
     "type": "git",
