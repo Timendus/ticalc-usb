@@ -66,6 +66,12 @@ module.exports = class Device {
       throw `Expected raw packet type VIRT_DATA_LAST, but got ${raw.type} instead`;
 
     const virtual = b.destructVirtualPacket(raw.data);
+    if ( virtual.type == v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK && virtualType != virtual.type ) {
+      await this._sendAck();
+      const delay = b.bytesToInt(virtual.data);
+      await this.wait(delay / 1000);
+      return await this.expect(virtualType);
+    }
     if ( virtual.type != virtualType )
       throw `Expected virtual packet type ${virtualType}, but got ${virtual.type} instead`;
 

@@ -40,9 +40,6 @@ module.exports = class Ti84series {
       type: v.virtualPacketTypes.DUSB_VPKT_EXECUTE,
       data: [0, 0, v.executeCommands.DUSB_EID_KEY, 0, key]
     });
-    await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK);
-    // This does not seem strictly necessary:
-    // await this._d.wait(100);
     await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_DATA_ACK);
   }
 
@@ -56,10 +53,6 @@ module.exports = class Ti84series {
         b.intToBytes(v.parameters.DUSB_PID_FREE_FLASH, 2)
       ].flat()
     });
-
-    const delayResponse = await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK);
-    const delay = b.bytesToInt(delayResponse.data);
-    await this._d.wait(delay / 1000);
 
     const paramsResponse = await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_PARM_DATA);
     const params = b.destructParameters(paramsResponse.data);
