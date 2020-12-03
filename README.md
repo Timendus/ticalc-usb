@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Timendus/ticalc-usb.svg?branch=master)](https://travis-ci.org/Timendus/ticalc-usb)
+[![Build Status](https://travis-ci.com/Timendus/ticalc-usb.svg?branch=master)](https://travis-ci.com/Timendus/ticalc-usb)
 [![Version on NPM](https://img.shields.io/npm/v/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
 [![Downloads on NPM](https://img.shields.io/npm/dt/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
 [![Maintainability](https://api.codeclimate.com/v1/badges/06bc064d98df904cc4b7/maintainability)](https://codeclimate.com/github/Timendus/ticalc-usb/maintainability)
