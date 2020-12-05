@@ -62,15 +62,28 @@ module.exports = class Device {
   // program from the calculator.
   async expect(virtualType) {
     const raw = b.destructRawPacket(await this._receive());
+
     if ( raw.type != v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST )
       throw `Expected raw packet type VIRT_DATA_LAST, but got ${raw.type} instead`;
 
     const virtual = b.destructVirtualPacket(raw.data);
-    if ( virtual.type != virtualType )
-      throw `Expected virtual packet type ${virtualType}, but got ${virtual.type} instead`;
 
-    await this._sendAck();
-    return virtual;
+    // Did we get what we expected?
+    if ( virtual.type == virtualType ) {
+      await this._sendAck();
+      return virtual;
+    }
+
+    // If not, did we get a delay request?
+    if ( virtual.type == v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK ) {
+      await this._sendAck();
+      const delay = b.bytesToInt(virtual.data);
+      await this.wait(delay / 1000);
+      return this.expect(virtualType);
+    }
+
+    // Otherwise, we have a problem here
+    throw `Expected virtual packet type ${virtualType}, but got ${virtual.type} instead`;
   }
 
   // Halt execution for the given amount of milliseconds
