@@ -98,13 +98,14 @@ try {
 }
 ```
 
-On calculator objects you can call four async methods, three of which are shown
+On calculator objects you can call five async methods, three of which are shown
 in the example above:
 
   * `isReady()` - return true if calculator is connected and listening
   * `pressKey(key)` - remotely press a key on the calculator
   * `getFreeMem()` - get free RAM and Flash memory
-  * `sendFile(file)` - Sends a given file object to the calculator (silent transfer)
+  * `sendFile(file)` - send a given file object to the calculator (silent transfer)
+  * `getStorageDetails(file)` - check if a given file object fits in the available storage
 
 And one regular method:
 
