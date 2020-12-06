@@ -68,22 +68,25 @@ module.exports = class Device {
 
     const virtual = b.destructVirtualPacket(raw.data);
 
-    // Did we get what we expected?
-    if ( virtual.type == virtualType ) {
-      await this._sendAck();
-      return virtual;
-    }
+    switch(virtual.type) {
 
-    // If not, did we get a delay request?
-    if ( virtual.type == v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK ) {
-      await this._sendAck();
-      const delay = b.bytesToInt(virtual.data);
-      await this.wait(delay / 1000);
-      return this.expect(virtualType);
-    }
+      // Did we get what we expected?
+      case virtualType:
+        await this._sendAck();
+        return virtual;
 
-    // Otherwise, we have a problem here
-    throw `Expected virtual packet type ${virtualType}, but got ${virtual.type} instead`;
+      // If not, did we get a delay request?
+      case v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK:
+        await this._sendAck();
+        const delay = b.bytesToInt(virtual.data);
+        await this.wait(delay / 1000);
+        return this.expect(virtualType);
+
+      // Otherwise, we have a problem here
+      default:
+        throw `Expected virtual packet type ${virtualType}, but got ${virtual.type} instead`;
+
+    }
   }
 
   // Halt execution for the given amount of milliseconds
