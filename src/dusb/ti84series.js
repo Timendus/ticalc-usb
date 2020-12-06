@@ -23,17 +23,17 @@ module.exports = class Ti84series {
   async getStorageDetails(file) {
     const free = await this.getFreeMem();
 
-    const ram = file.entries.filter(e => !e.attributes.archived)
-                            .reduce((a, e) => a + e.size, 0);
-
-    const flash = file.entries.filter(e => e.attributes.archived)
-                              .reduce((a, e) => a + e.size, 0);
+    const required = {
+      ram:   file.entries.filter(e => !e.attributes.archived)
+                         .reduce((a, e) => a + e.size, 0),
+      flash: file.entries.filter(e => e.attributes.archived)
+                         .reduce((a, e) => a + e.size, 0)
+    };
 
     return {
-      free,
-      required: { ram, flash },
-      fits: free.flash >= flash &&
-            free.ram === undefined || free.ram >= ram
+      free, required,
+      fits: free.flash >= required.flash &&
+            free.ram === undefined || free.ram >= required.ram
     };
   }
 
