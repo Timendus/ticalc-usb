@@ -33,7 +33,7 @@ module.exports = class Ti84series {
     return {
       free, required,
       fits: free.flash >= required.flash &&
-            free.ram === undefined || free.ram >= required.ram
+            ( free.ram === undefined || free.ram >= required.ram )
     };
   }
 
