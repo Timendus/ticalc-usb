@@ -14,8 +14,27 @@ module.exports = class Ti84series {
     return this;
   }
 
+  // Is the file type supported by our device?
   canReceive(file) {
     return this.compatibleFiles.includes(file.calcType);
+  }
+
+  // Does the device have enough storage space?
+  async getStorageDetails(file) {
+    const free = await this.getFreeMem();
+
+    const required = {
+      ram:   file.entries.filter(e => !e.attributes.archived)
+                         .reduce((a, e) => a + e.size, 0),
+      flash: file.entries.filter(e => e.attributes.archived)
+                         .reduce((a, e) => a + e.size, 0)
+    };
+
+    return {
+      free, required,
+      fits: free.flash >= required.flash &&
+            ( free.ram === undefined || free.ram >= required.ram )
+    };
   }
 
   // Check if the calculator is connected and listening

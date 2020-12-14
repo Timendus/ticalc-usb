@@ -27,7 +27,7 @@ const properties = {
   ]
 };
 
-const Calculator = require('../../dusb/ti84series');
+const Calculator = require('../../dusb/ez80series');
 module.exports = {
   ...properties,
   connect: device => new Calculator({ device, properties }).connect()
