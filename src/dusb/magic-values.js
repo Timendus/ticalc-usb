@@ -12,7 +12,9 @@ module.exports = {
 
     DUSB_RPKT_VIRT_DATA:       3,
     DUSB_RPKT_VIRT_DATA_LAST:  4,
-    DUSB_RPKT_VIRT_DATA_ACK:   5
+    DUSB_RPKT_VIRT_DATA_ACK:   5,
+
+    HEADER_SIZE:               4 + 1
   },
 
   // Virtual packet types
