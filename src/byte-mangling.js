@@ -13,7 +13,8 @@ module.exports = {
   asciiToBytes,
   bytesToAscii,
 
-  chunkArray
+  chunkArray,
+  mergeBuffers
 }
 
 function constructRawPacket(packet) {
@@ -192,6 +193,21 @@ function chunkArray(array, sizes) {
   while ( j < array.length ) {
     result.push(array.slice(j, j + sizes[i]));
     j += sizes[i];
+  }
+  return result;
+}
+
+// Merge multiple byte arrays into a single byte array
+function mergeBuffers(buffers) {
+  let totalLength = 0;
+  for(const buffer of buffers) {
+    totalLength += buffer.byteLength;
+  }
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for(const buffer of buffers) {
+    result.set(buffer, 0);
+    offset += buffer.byteLength;
   }
   return result;
 }

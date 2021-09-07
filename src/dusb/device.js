@@ -54,16 +54,23 @@ module.exports = class Device {
   }
 
   // Expect a virtual packet of a certain type, returns the packet if the type
-  // matches. Throws an error otherwise. Note that this function does not
-  // support a fragmented data transfer, and as such can't be used to receive a
-  // program from the calculator.
+  // matches. Throws an error otherwise.
   async expect(virtualType) {
-    const raw = b.destructRawPacket(await this._receive());
+    let raw;
+    const raw_packets = [];
+
+    // Receive raw packets until we get a VIRT_DATA_LAST packet
+    do {
+      raw = b.destructRawPacket(await this._receive());
+      raw_packets.push(raw);
+    } while ( raw.type == v.rawPacketTypes.DUSB_RPKT_VIRT_DATA );
 
     if ( raw.type != v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST )
       throw `Expected raw packet type VIRT_DATA_LAST, but got ${raw.type} instead`;
 
-    const virtual = b.destructVirtualPacket(raw.data);
+    const combinedData = b.mergeBuffers(raw_packets.map((x) => x.data));
+
+    const virtual = b.destructVirtualPacket(combinedData);
 
     switch(virtual.type) {
 
