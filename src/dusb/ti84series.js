@@ -62,25 +62,34 @@ module.exports = class Ti84series {
     await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_DATA_ACK);
   }
 
-  // Request the amount of free RAM and Flash memory
-  async getFreeMem() {
+  async getParameters(attributes) {
     await this._d.send({
       type: v.virtualPacketTypes.DUSB_VPKT_PARM_REQ,
       data: [
-        0, 2,
-        b.intToBytes(v.parameters.DUSB_PID_FREE_RAM, 2),
-        b.intToBytes(v.parameters.DUSB_PID_FREE_FLASH, 2)
+        b.intToBytes(attributes.length, 2),
+        ...attributes.map(x => b.intToBytes(x, 2))
       ].flat()
     });
 
     const paramsResponse = await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_PARM_DATA);
-    const params = b.destructParameters(paramsResponse.data);
-    if ( !params.every(p => p.ok) )
-      throw 'Could not succesfully get all parameters';
+    return b.destructParameters(paramsResponse.data);
+  }
+
+  // Request the amount of free RAM and Flash memory
+  async getFreeMem() {
+    const params = await this.getParameters([
+      v.parameters.DUSB_PID_FREE_RAM,
+      v.parameters.DUSB_PID_FREE_FLASH,
+    ]);
+
+    if ( !params[v.parameters.DUSB_PID_FREE_RAM] )
+      throw 'Could not get amount of free RAM';
+    if ( !params[v.parameters.DUSB_PID_FREE_FLASH] )
+      throw 'Could not get amount of free FLASH';
 
     return {
-      ram: params.find(p => p.type == v.parameters.DUSB_PID_FREE_RAM).value,
-      flash: params.find(p => p.type == v.parameters.DUSB_PID_FREE_FLASH).value,
+      ram: b.bytesToInt(params[v.parameters.DUSB_PID_FREE_RAM]),
+      flash: b.bytesToInt(params[v.parameters.DUSB_PID_FREE_FLASH]),
     };
   }
 
@@ -119,18 +128,15 @@ module.exports = class Ti84series {
     return b.constructParameters([
       {
         type: v.attributes.DUSB_AID_VAR_TYPE,
-        size: 4,
-        value: 0xF0070000 + entry.type
+        value: b.intToBytes(0xF0070000 + entry.type, 4)
       },
       {
         type: v.attributes.DUSB_AID_ARCHIVED,
-        size: 1,
-        value: entry.attributes && entry.attributes.archived ? 1 : 0
+        value: b.intToBytes(entry.attributes && entry.attributes.archived ? 1 : 0, 1)
       },
       {
         type: v.attributes.DUSB_AID_VAR_VERSION,
-        size: 4,
-        value: entry.attributes && entry.attributes.version || 0
+        value: b.intToBytes(entry.attributes && entry.attributes.version || 0, 1)
       }
     ]);
   }
