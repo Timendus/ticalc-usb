@@ -56,6 +56,14 @@ module.exports = class Device {
   // Expect a virtual packet of a certain type, returns the packet if the type
   // matches. Throws an error otherwise.
   async expect(virtualType) {
+    const packet = await this.expectAny();
+    if ( packet.type != virtualType ) {
+      throw `Expected virtual packet type ${virtualType}, but got ${packet.type} instead`;
+    }
+    return packet;
+  }
+
+  async expectAny() {
     let raw;
     const raw_packets = [];
 
@@ -72,24 +80,14 @@ module.exports = class Device {
 
     const virtual = b.destructVirtualPacket(combinedData);
 
-    switch(virtual.type) {
-
-      // Did we get what we expected?
-      case virtualType:
-        await this._sendAck();
-        return virtual;
-
-      // If not, did we get a delay request?
-      case v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK:
-        await this._sendAck();
-        const delay = b.bytesToInt(virtual.data);
-        await this.wait(delay / 1000);
-        return this.expect(virtualType);
-
-      // Otherwise, we have a problem here
-      default:
-        throw `Expected virtual packet type ${virtualType}, but got ${virtual.type} instead`;
-
+    if ( virtual.type == v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK ) {
+      await this._sendAck();
+      const delay = b.bytesToInt(virtual.data);
+      await this.wait(delay / 1000);
+      return await this.expectAny();
+    } else {
+      await this._sendAck();
+      return virtual;
     }
   }
 
