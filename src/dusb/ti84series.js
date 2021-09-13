@@ -93,6 +93,37 @@ module.exports = class Ti84series {
     };
   }
 
+  async getDirectory() {
+    await this._d.send({
+      type: v.virtualPacketTypes.DUSB_VPKT_DIR_REQ,
+      data: [
+        0, 0, 0, 3, // attribute count
+        0, 1, // size
+        0, 2, // type
+        0, 3, // archived
+        0, 1, 0, 1, 0, 1, 1 // ???
+      ]
+    });
+    const result = [];
+    while ( true ) {
+      const packet = await this._d.expectAny();
+      if ( packet.type == v.virtualPacketTypes.DUSB_VPKT_EOT )
+        break;
+      if ( packet.type != v.virtualPacketTypes.DUSB_VPKT_VAR_HDR )
+        throw `Expected virtual packet type ${v.virtualPacketTypes.DUSB_VPKT_VAR_HDR}, but got ${packet.type} instead`;
+      const nameLength = b.bytesToInt(packet.data.slice(0, 2));
+      const name = b.bytesToAscii(packet.data.slice(2, 2 + nameLength));
+      const attributes = b.destructParameters(packet.data.slice(2 + nameLength + 1));
+
+      const size = b.bytesToInt(attributes[v.attributes.DUSB_AID_VAR_SIZE]);
+      const type = b.bytesToInt(attributes[v.attributes.DUSB_AID_VAR_TYPE].slice(2));
+      const archived = attributes[v.attributes.DUSB_AID_ARCHIVED][0] == 1;
+
+      result.push({name, size, type, archived});
+    }
+    return result;
+  }
+
   // Send a TI file to the calculator
   async sendFile(file) {
     for ( let i = 0; i < file.entries.length; i++ ) {

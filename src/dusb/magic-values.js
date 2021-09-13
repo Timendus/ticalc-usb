@@ -89,6 +89,7 @@ module.exports = {
   // https://github.com/debrouxl/tilibs/blob/master/libticalcs/trunk/src/dusb_cmd.h
 
   attributes: {
+    DUSB_AID_VAR_SIZE:          0x01,
     DUSB_AID_VAR_TYPE:          0x02,
     DUSB_AID_ARCHIVED:          0x03,
     DUSB_AID_VAR_VERSION:       0x08,
