@@ -83,6 +83,23 @@ module.exports = class Ti84series {
       flash: params.find(p => p.type == v.parameters.DUSB_PID_FREE_FLASH).value,
     };
   }
+  
+  async delete(name, type) {
+    await this._d.send({
+      type: v.virtualPacketTypes.DUSB_VPKT_MODIF_VAR,
+      data: [
+        0, name.length,
+        ...b.asciiToBytes(name),
+        ...b.constructParameters([{
+          type: v.attributes.DUSB_AID_VAR_TYPE2,
+          value: b.intToBytes(0xF0070000 + type, 4)
+        }]),
+        1,
+        0, 0, 0, 0, 0
+      ]
+    });
+    await this._d.expect(v.virtualPacketTypes.DUSB_VPKT_DATA_ACK);
+  }
 
   // Send a TI file to the calculator
   async sendFile(file) {
