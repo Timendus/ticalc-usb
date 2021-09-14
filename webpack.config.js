@@ -13,5 +13,11 @@ module.exports = {
     libraryTarget: 'umd',
     path: path.join(__dirname, 'dist'),
     filename: '[name].js'
+  },
+
+  resolve: {
+    fallback: {
+      util: false
+    }
   }
 };
