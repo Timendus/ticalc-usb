@@ -130,7 +130,7 @@ function entryHeader(bytes, file) {
       attributes: false
     };
   } else if ( ti83p ) {
-    const attributes = b.bytesToInt(bytes.slice(12, 14).reverse());
+    const attributes = b.bytesToInt(bytes.slice(13, 15).reverse());
     return {
       // packetLength + size + type + padded name + attributes + size2
       size: 2 + 2 + 1 + 8 + 2 + 2,
