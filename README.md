@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/timendus/ticalc-usb/actions/workflows/test.yaml/badge.svg)
+[![Build Status](https://github.com/timendus/ticalc-usb/actions/workflows/test.yaml/badge.svg)](https://github.com/Timendus/ticalc-usb/actions/workflows/test.yaml)
 [![Version on NPM](https://img.shields.io/npm/v/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
 [![Downloads on NPM](https://img.shields.io/npm/dt/ticalc-usb)](https://www.npmjs.com/package/ticalc-usb)
 [![Maintainability](https://api.codeclimate.com/v1/badges/06bc064d98df904cc4b7/maintainability)](https://codeclimate.com/github/Timendus/ticalc-usb/maintainability)
