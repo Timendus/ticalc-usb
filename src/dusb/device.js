@@ -30,26 +30,23 @@ module.exports = class Device {
 
   // Send a virtual packet to the device
   async send(packet) {
+    const virtualPacket = b.constructVirtualPacket(packet);
     // Cut data in chunks to be sent
     const chunks = b.chunkArray(
-      packet.data || [],
+      virtualPacket || [],
       [
-        this._bufferSize - v.virtualPacketTypes.HEADER_SIZE, // Leave room for header on first
-        this._bufferSize                                     // Cut the rest in equal pieces
+        this._bufferSize - v.rawPacketTypes.HEADER_SIZE
       ]
     );
 
     // Send the chunks
     for ( let i = 0; i < chunks.length; i++ ) {
-      // Give the first packet a virtual header
-      const data = i == 0 ?
-        b.constructVirtualPacket({ ...packet, data: chunks[i] }) :
-        chunks[i];
-
       // Give the last packet a type DUSB_RPKT_VIRT_DATA_LAST
       const type = i == chunks.length - 1 ?
         v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST:
         v.rawPacketTypes.DUSB_RPKT_VIRT_DATA ;
+
+      const data = chunks[i];
 
       await this._send(b.constructRawPacket({ type, data }));
       await this._expectAck();
