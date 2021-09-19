@@ -62,6 +62,10 @@ module.exports = {
     }
   },
 
+  setSupportLevel: level => {
+    calculators = calculatorsForSupportLevel(level);
+  },
+
   choose: async (options = {}) => {
     const usb = options.usb || findOrCreateWebUSBRecording();
 
