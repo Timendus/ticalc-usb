@@ -1,6 +1,6 @@
 const properties = {
   name: "TI-84 Plus CE",
-  status: "experimental",
+  status: "beta",
 
   // This is a filter for navigator.usb.requestDevice
   // See http://www.linux-usb.org/usb.ids for IDs
