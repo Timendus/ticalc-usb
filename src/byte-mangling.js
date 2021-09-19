@@ -77,7 +77,7 @@ function constructParameters(params) {
 
   return new Uint8Array([
     intToBytes(params.length, 2),
-      ...params.map(param => [
+    ...params.map(param => [
       intToBytes(param.type, 2),
       intToBytes(param.value.length, 2),
       ...param.value
