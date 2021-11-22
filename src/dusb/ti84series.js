@@ -1,6 +1,7 @@
 const Device = require('../dusb/device');
 const v = require('../dusb/magic-values');
 const b = require('../byte-mangling');
+const c = require('../character-encoding/convert');
 
 module.exports = class Ti84series {
 
@@ -92,11 +93,16 @@ module.exports = class Ti84series {
   }
 
   async _sendEntry(entry) {
+    // Convert TI file character encoding to this device's character encoding
+    // and then convert that to an array of bytes
+    let entryName = c.parseAsTIChars(entry.name, this.characterEncoding);
+    entryName = c.UTFToBytes(entryName, entryName.length);
+
     await this._d.send({
       type: v.virtualPacketTypes.DUSB_VPKT_RTS,
       data: [
-        ...b.intToBytes(entry.name.length, 2),
-        ...b.asciiToBytes(entry.name, entry.name.length), 0,
+        ...b.intToBytes(entryName.length, 2),
+        ...entryName, 0,
         ...b.intToBytes(entry.size, 4),
         v.transferModes.SILENT,
         ...this._entryParameters(entry)

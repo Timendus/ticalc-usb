@@ -80,7 +80,7 @@ describe('tifiles.js', () => {
         size: 731,
         entries: [
           {
-            name: 'ROMDUMP',
+            displayName: 'ROMDUMP',
             type: 6,
             size: 716
           }
@@ -101,17 +101,17 @@ describe('tifiles.js', () => {
         size: 1451,
         entries: [
           {
-            name: 'BOGGLE',
+            displayName: 'BOGGLE',
             type: 5,
             size: 1159
           },
           {
-            name: ']BOGGL',
+            displayName: ']BOGGL',
             type: 1,
             size: 11
           },
           {
-            name: ']ASCII',
+            displayName: ']ASCII',
             type: 13,
             size: 236
           }
@@ -136,7 +136,7 @@ describe('tifiles.js', () => {
         size: 116,
         entries: [
           {
-            name: 'TVA',  // Not sure if this is right
+            displayName: 'TVA',  // Not sure if this is right
             type: 5,      // But it could be ;)
             size: 101
           }
@@ -157,12 +157,12 @@ describe('tifiles.js', () => {
         size: 48,
         entries: [
           {
-            name: 'A',
+            displayName: 'A',
             type: 0,
             size: 9
           },
           {
-            name: 'B',
+            displayName: 'B',
             type: 0,
             size: 9
           }
@@ -187,7 +187,7 @@ describe('tifiles.js', () => {
         size: 721,
         entries: [
           {
-            name: 'ROMDUMP',
+            displayName: 'ROMDUMP',
             type: 6,
             size: 706
           }
@@ -208,12 +208,12 @@ describe('tifiles.js', () => {
         size: 48,
         entries: [
           {
-            name: 'A',
+            displayName: 'A',
             type: 0,
             size: 9
           },
           {
-            name: 'B',
+            displayName: 'B',
             type: 0,
             size: 9
           }
@@ -238,7 +238,7 @@ describe('tifiles.js', () => {
         size: 438,
         entries: [
           {
-            name: 'ROMDUMP',
+            displayName: 'ROMDUMP',
             type: 6,
             size: 421
           }
@@ -259,12 +259,12 @@ describe('tifiles.js', () => {
         size: 52,
         entries: [
           {
-            name: 'A',
+            displayName: 'A',
             type: 0,
             size: 9
           },
           {
-            name: 'B',
+            displayName: 'B',
             type: 0,
             size: 9
           }
@@ -289,7 +289,7 @@ describe('tifiles.js', () => {
         size: 410,
         entries: [
           {
-            name: 'FList',
+            displayName: 'FList',
             type: 18,
             size: 397
           }
@@ -310,12 +310,12 @@ describe('tifiles.js', () => {
         size: 38,
         entries: [
           {
-            name: 'A',
+            displayName: 'A',
             type: 0,
             size: 10
           },
           {
-            name: 'B',
+            displayName: 'B',
             type: 0,
             size: 10
           }
@@ -340,7 +340,7 @@ describe('tifiles.js', () => {
         size: 707,
         entries: [
           {
-            name: 'ROMDump',
+            displayName: 'ROMDump',
             type: 18,
             size: 692
           }
@@ -361,12 +361,12 @@ describe('tifiles.js', () => {
         size: 52,
         entries: [
           {
-            name: 'Y',
+            displayName: 'Y',
             type: 0,
             size: 10
           },
           {
-            name: 'X',
+            displayName: 'X',
             type: 0,
             size: 10
           }

@@ -2,6 +2,7 @@
 // Inspired by tilibs (https://github.com/debrouxl/tilibs)
 
 const b = require('./byte-mangling');
+const c = require('./character-encoding/convert');
 
 module.exports = {
 
@@ -23,7 +24,7 @@ module.exports = {
 
     return {
       calcType, size,
-      comments:  b.bytesToAscii(file.slice(11, 53)),
+      comments:  c.parseAsTIChars(file.slice(11, 53), calcType),
       entries:   findEntries(file.slice(55), { size, calcType }),
       debug: {
         signature: getSignature(file.slice(8,11)),
@@ -55,7 +56,7 @@ function getCalcType(bytes) {
     '**V200**': 'TI-V200',
     '**TICBL*': 'TI-CBL2'
   };
-  return headers[b.bytesToAscii(bytes)] || 'NONE';
+  return headers[c.parseAsUTF(bytes)] || 'NONE';
 }
 
 function findEntries(bytes, file) {
@@ -90,7 +91,8 @@ function getEntry(bytes, file) {
   const size = b.bytesToInt(bytes.slice(2, 4).reverse());
 
   return {
-    name: b.bytesToAscii(header.name),
+    displayName: c.parseAsTIChars(header.name, file.calcType),
+    name: b.zeroTerminate(header.name),
     type: bytes[4],
     attributes: header.attributes,
     size,
