@@ -1,3 +1,12 @@
+// All the conversion magic for character encoding, to and from different
+// formats and bytes
+
+module.exports = {
+  parseAsUTF,
+  parseAsTIChars,
+  UTFToBytes
+};
+
 const charEncodings = {
   'TI-73':      require('./ti73'),
   'TI-82':      require('./ti82'),
@@ -12,27 +21,36 @@ const charEncodings = {
   //'TI-CBL2':    require(???),
 }
 
-module.exports = {
-  // String in, string out
-  toUTF16: (charset, input) =>
-    convert(charset, input, (cs, c) => cs[c]),
-  fromUTF16: (charset, input) =>
-    convert(charset, input, (cs, c) => cs.indexOf(c)),
+function parseAsUTF(bytes) {
+  // A string can be zero-terminated. Make sure we respect that
+  const index = bytes.indexOf(0);
+  if ( index >= 0 ) bytes = bytes.slice(0, index);
 
-  // Uint8Array in, string out
-  parse: (input, calcType) => {
-    let charset = charEncodings[calcType];
-    if (!charset) return "Decoding error: can't decode strings for this calculator type";
-    let output = '';
-    for ( c of input ) {
-      output += String.fromCharCode(charset[c]);
-    }
-    return output;
+  // Interpret the rest as UTF-8 bytes
+  const TD = typeof TextDecoder !== 'undefined' ? TextDecoder : require('util').TextDecoder;
+  return new TD("utf8").decode(bytes);
+}
+
+function parseAsTIChars(bytes, calcType) {
+  // A string can be zero-terminated. Make sure we respect that
+  const index = bytes.indexOf(0);
+  if ( index >= 0 ) bytes = bytes.slice(0, index);
+
+  // Interpret the rest as a TI encoded string
+  const charset = charEncodings[calcType];
+  if (!charset) return "Decoding error: can't decode strings for this calculator type";
+  let output = '';
+  for ( c of bytes ) {
+    output += String.fromCharCode(charset[c]);
   }
-};
+  return output;
+}
 
-function convert(charset, input, lookup) {
-  return input.split('')
-              .map(c => String.fromCharCode(lookup(charset, c.charCodeAt(0))))
-              .join('');
+function UTFToBytes(string, length) {
+  length = length || string.length + 1;
+  const TE = typeof TextEncoder !== 'undefined' ? TextEncoder : require('util').TextEncoder;
+  const bytes = new TE("utf-8").encode(string);
+  const result = new Uint8Array(length);
+  result.set(bytes.slice(0,length));
+  return result;
 }
