@@ -46,11 +46,8 @@ function parseAsTIChars(bytes, calcType) {
   return output;
 }
 
-function UTFToBytes(string, length) {
-  length = length || string.length + 1;
+function UTFToBytes(string) {
   const TE = typeof TextEncoder !== 'undefined' ? TextEncoder : require('util').TextEncoder;
   const bytes = new TE("utf-8").encode(string);
-  const result = new Uint8Array(length);
-  result.set(bytes.slice(0,length));
-  return result;
+  return new Uint8Array(bytes);
 }

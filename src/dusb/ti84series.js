@@ -96,7 +96,7 @@ module.exports = class Ti84series {
     // Convert TI file character encoding to this device's character encoding
     // and then convert that to an array of bytes
     let entryName = c.parseAsTIChars(entry.name, this.characterEncoding);
-    entryName = c.UTFToBytes(entryName, entryName.length);
+    entryName = c.UTFToBytes(entryName);
 
     await this._d.send({
       type: v.virtualPacketTypes.DUSB_VPKT_RTS,

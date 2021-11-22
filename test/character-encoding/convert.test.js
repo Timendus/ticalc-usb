@@ -4,23 +4,11 @@ const ti8x = require('../../src/character-encoding/ti8x+');
 describe('Character encoding conversion', () => {
 
   describe('UTFToBytes', () => {
-    it('converts a string to a zero terminated Uint8Array', () => {
+    it('converts a string to a Uint8Array', () => {
       expect(c.UTFToBytes(
         "Hello world"
       )).toEqual(
-        new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0])
-      );
-    });
-    it('converts a string to a Uint8Array of specified length', () => {
-      expect(c.UTFToBytes(
-        "Hello world", 14
-      )).toEqual(
-        new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0, 0, 0])
-      );
-      expect(c.UTFToBytes(
-        "Hello world", 8
-      )).toEqual(
-        new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111])
+        new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])
       );
     });
   });
