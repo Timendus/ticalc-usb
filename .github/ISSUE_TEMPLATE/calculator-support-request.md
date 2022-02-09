@@ -1,7 +1,7 @@
 ---
 name: Request support for new calculator type
 about: Request the developers to support a new (currently unsupported) type of calculator in the ticalc-usb library
-title: Request support for new calculator type
+title: Please support this new calculator type
 labels: device support request
 assignees: ''
 
