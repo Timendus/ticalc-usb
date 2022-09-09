@@ -5,6 +5,8 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/06bc064d98df904cc4b7/test_coverage)](https://codeclimate.com/github/Timendus/ticalc-usb/test_coverage)
 [![License](https://img.shields.io/github/license/timendus/ticalc-usb)](LICENSE)
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T0DOOWP)
+
 # ticalc-usb
 
 `ticalc-usb` is a Javascript library to communicate with Texas Instruments
