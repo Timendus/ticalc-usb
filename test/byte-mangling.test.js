@@ -67,13 +67,11 @@ describe('byte-mangling.js', () => {
         expect(b.constructParameters([
           {
             type: 0x59FA,
-            size: 3,
-            value: 0x123456
+            value: new Uint8Array([0x12,0x34,0x56])
           },
           {
             type: 0x0001,
-            size: 1,
-            value: 6
+            value: new Uint8Array([6])
           }
         ])).toEqual(
           new Uint8Array([0,2, 0x59,0xFA, 0,3, 0x12,0x34,0x56, 0x00,0x01, 0,1, 6])
@@ -87,29 +85,13 @@ describe('byte-mangling.js', () => {
           new Uint8Array([
             0,3,
             0xDE,0x35, 0, 0,2, 0xAB,0xCD,
-            0x02,0x00, 1, 0,5, 0,0,0x12,0x34,0x56,
+            0x02,0x00, 1,
             0x00,0x4A, 0, 0,5, 0x12,0x34,0x56,0x78,0x90
           ])
-        )).toEqual([
-          {
-            type: 0xDE35,
-            ok: true,
-            size: 2,
-            value: 0xABCD
-          },
-          {
-            type: 0x0200,
-            ok: false,
-            size: 5,
-            value: 0x123456
-          },
-          {
-            type: 0x004A,
-            ok: true,
-            size: 5,
-            value: 0x1234567890
-          }
-        ]);
+        )).toEqual({
+          "56885": new Uint8Array([0xAB,0xCD]),
+          "74": new Uint8Array([0x12,0x34,0x56,0x78,0x90])
+        });
       });
     });
 
@@ -242,6 +224,30 @@ describe('byte-mangling.js', () => {
         [10]
       )).toEqual(
         [[]]
+      );
+    });
+  });
+
+  describe('mergeBuffers', () => {
+    it('combines multiple arrays', () => {
+      expect(b.mergeBuffers(
+        [new Uint8Array([1,2,3]), new Uint8Array([4,5,6]), new Uint8Array([7,8,9])]
+      )).toEqual(
+        new Uint8Array([1,2,3,4,5,6,7,8,9])
+      );
+    });
+    it('handles empty arrays', () => {
+      expect(b.mergeBuffers(
+        [new Uint8Array([1,2,3]), new Uint8Array([]), new Uint8Array([7,8,9])]
+      )).toEqual(
+        new Uint8Array([1,2,3,7,8,9])
+      );
+    });
+    it('preserves a single array', () => {
+      expect(b.mergeBuffers(
+        [new Uint8Array([1,2,3])]
+      )).toEqual(
+        new Uint8Array([1,2,3])
       );
     });
   });

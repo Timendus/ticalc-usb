@@ -13,7 +13,8 @@ module.exports = {
   asciiToBytes,
   bytesToAscii,
 
-  chunkArray
+  chunkArray,
+  mergeBuffers
 }
 
 function constructRawPacket(packet) {
@@ -78,8 +79,8 @@ function constructParameters(params) {
     intToBytes(params.length, 2),
     ...params.map(param => [
       intToBytes(param.type, 2),
-      intToBytes(param.size, 2),
-      intToBytes(param.value, param.size)
+      intToBytes(param.value.length, 2),
+      ...param.value
     ].flat())
   ].flat());
 }
@@ -97,18 +98,18 @@ function destructParameters(params) {
    *  7-X    X    parameter value
    *  X-          repeat pattern N times
    */
-  const result = [];
+  const result = {};
   const count = bytesToInt(params.slice(0,2));
   let j = 2;
   for ( let i = 0; i < count; i++ ) {
-    const size = bytesToInt(params.slice(j+3,j+5));
-    result.push({
-      type: bytesToInt(params.slice(j,j+2)),
-      ok: params[j+2] == 0,
-      size,
-      value: bytesToInt(params.slice(j+5, j+5+size))
-    });
-    j += 5 + size;
+    const type = bytesToInt(params.slice(j,j+2));
+    if(params[j+2] == 0) {
+      const size = bytesToInt(params.slice(j+3,j+5));
+      result[type] = params.slice(j+5, j+5+size);
+      j += 5 + size;
+    } else {
+      j += 3;
+    }
   }
   return result;
 }
@@ -192,6 +193,21 @@ function chunkArray(array, sizes) {
   while ( j < array.length ) {
     result.push(array.slice(j, j + sizes[i]));
     j += sizes[i];
+  }
+  return result;
+}
+
+// Merge multiple byte arrays into a single byte array
+function mergeBuffers(buffers) {
+  let totalLength = 0;
+  for(const buffer of buffers) {
+    totalLength += buffer.byteLength;
+  }
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for(const buffer of buffers) {
+    result.set(buffer, offset);
+    offset += buffer.byteLength;
   }
   return result;
 }

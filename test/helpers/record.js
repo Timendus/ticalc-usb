@@ -14,6 +14,8 @@ ticalc.addEventListener('connect', async calc => {
   if ( await calc.isReady() ) {
     const memFree = await calc.getFreeMem();
     console.log(memFree);
+    const directory = await calc.getDirectory();
+    console.log(directory);
     fs.writeFile(filename, JSON.stringify(recording.getSteps()), err => {
       if (err) return console.error(err);
       console.log(`Wrote recording to ${filename}`);

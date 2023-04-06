@@ -54,35 +54,40 @@ module.exports = class Device {
   }
 
   // Expect a virtual packet of a certain type, returns the packet if the type
-  // matches. Throws an error otherwise. Note that this function does not
-  // support a fragmented data transfer, and as such can't be used to receive a
-  // program from the calculator.
+  // matches. Throws an error otherwise.
   async expect(virtualType) {
-    const raw = b.destructRawPacket(await this._receive());
+    const packet = await this.expectAny();
+    if ( packet.type != virtualType ) {
+      throw `Expected virtual packet type ${virtualType}, but got ${packet.type} instead`;
+    }
+    return packet;
+  }
+
+  async expectAny() {
+    let raw;
+    const raw_packets = [];
+
+    // Receive raw packets until we get a VIRT_DATA_LAST packet
+    do {
+      raw = b.destructRawPacket(await this._receive());
+      raw_packets.push(raw);
+    } while ( raw.type == v.rawPacketTypes.DUSB_RPKT_VIRT_DATA );
 
     if ( raw.type != v.rawPacketTypes.DUSB_RPKT_VIRT_DATA_LAST )
       throw `Expected raw packet type VIRT_DATA_LAST, but got ${raw.type} instead`;
 
-    const virtual = b.destructVirtualPacket(raw.data);
+    const combinedData = b.mergeBuffers(raw_packets.map((x) => x.data));
 
-    switch(virtual.type) {
+    const virtual = b.destructVirtualPacket(combinedData);
 
-      // Did we get what we expected?
-      case virtualType:
-        await this._sendAck();
-        return virtual;
-
-      // If not, did we get a delay request?
-      case v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK:
-        await this._sendAck();
-        const delay = b.bytesToInt(virtual.data);
-        await this.wait(delay / 1000);
-        return this.expect(virtualType);
-
-      // Otherwise, we have a problem here
-      default:
-        throw `Expected virtual packet type ${virtualType}, but got ${virtual.type} instead`;
-
+    if ( virtual.type == v.virtualPacketTypes.DUSB_VPKT_DELAY_ACK ) {
+      await this._sendAck();
+      const delay = b.bytesToInt(virtual.data);
+      await this.wait(delay / 1000);
+      return await this.expectAny();
+    } else {
+      await this._sendAck();
+      return virtual;
     }
   }
 

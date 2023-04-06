@@ -12,6 +12,7 @@ module.exports = {
       try {
         replay = JSON.parse(fs.readFileSync(replay, 'utf8'));
         replayPlayer = player(replay, { requiredMatcher: calculator.matcher });
+        ticalc.setSupportLevel('experimental');
         ticalc.addEventListener('connect', calc => resolve(calc));
         ticalc.choose({ usb: replayPlayer })
               .catch(e => reject(e));
