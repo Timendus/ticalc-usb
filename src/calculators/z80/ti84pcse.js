@@ -16,6 +16,9 @@ const properties = {
     productName: "TI-84 Plus C Silver Edition"
   },
 
+  // This is the character encoding scheme that the device expects
+  characterEncoding: 'TI-84 Plus',
+
   // These are the file types we can send this particular device
   compatibleFiles: [
     'TI-83',

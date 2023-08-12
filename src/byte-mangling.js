@@ -10,8 +10,7 @@ module.exports = {
 
   intToBytes,
   bytesToInt,
-  asciiToBytes,
-  bytesToAscii,
+  zeroTerminate,
 
   chunkArray
 }
@@ -156,25 +155,12 @@ function _bytesSafeInteger(bytes) {
   return false;
 }
 
-function asciiToBytes(string, length) {
-  length = length || string.length + 1;
-  const TE = typeof TextEncoder !== 'undefined' ? TextEncoder : require('util').TextEncoder;
-  const bytes = new TE("utf-8").encode(string);
-  const result = new Uint8Array(length);
-  result.set(bytes.slice(0,length));
-  return result;
-}
-
-function bytesToAscii(bytes) {
-  // A string can be zero-terminated. Make sure we respect that
-  const index = bytes.indexOf(0);
-  if ( index >= 0 ) {
-    bytes = bytes.slice(0, index);
-  }
-
-  // Interpret the rest as UTF-8 bytes
-  const TD = typeof TextDecoder !== 'undefined' ? TextDecoder : require('util').TextDecoder;
-  return new TD("utf-8").decode(bytes);
+// Terminate an array of bytes at the first zero, stripping off the zero and
+// anything that may come after. If no zeroes are found, don't touch the input.
+function zeroTerminate(bytes) {
+  const firstZero = bytes.indexOf(0);
+  if ( firstZero == -1 ) return bytes;
+  return bytes.slice(0, firstZero);
 }
 
 // Split up an array in pieces, each of a size defined in sizes. If we run out

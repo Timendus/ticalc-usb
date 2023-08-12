@@ -159,52 +159,6 @@ describe('byte-mangling.js', () => {
       });
     });
 
-    describe('asciiToBytes', () => {
-      it('converts a string to a zero terminated Uint8Array', () => {
-        expect(b.asciiToBytes(
-          "Hello world"
-        )).toEqual(
-          new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0])
-        );
-      });
-      it('converts a string to a Uint8Array of specified length', () => {
-        expect(b.asciiToBytes(
-          "Hello world", 14
-        )).toEqual(
-          new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0, 0, 0])
-        );
-        expect(b.asciiToBytes(
-          "Hello world", 8
-        )).toEqual(
-          new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111])
-        );
-      });
-    });
-
-    describe('bytesToAscii', () => {
-      it('converts a zero terminated array to a string', () => {
-        expect(b.bytesToAscii(
-          new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0])
-        )).toEqual(
-          "Hello world"
-        );
-      });
-      it('converts a non zero terminated array to a string', () => {
-        expect(b.bytesToAscii(
-          new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])
-        )).toEqual(
-          "Hello world"
-        );
-      });
-      it('ignores crap after the zero terminator', () => {
-        expect(b.bytesToAscii(
-          new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0, 72, 101, 108, 111])
-        )).toEqual(
-          "Hello world"
-        );
-      });
-    });
-
   });
 
   describe('chunkArray', () => {
