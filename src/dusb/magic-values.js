@@ -92,6 +92,7 @@ module.exports = {
     DUSB_AID_VAR_TYPE:          0x02,
     DUSB_AID_ARCHIVED:          0x03,
     DUSB_AID_VAR_VERSION:       0x08,
+    DUSB_AID_VAR_TYPE2:         0x11,
   },
 
   // Transfer modes
